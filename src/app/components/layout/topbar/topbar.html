@@ -47,11 +47,41 @@
   <button type="button" class="hidden h-9 w-9 items-center justify-center rounded text-secondary hover:bg-surface-container-high sm:flex" aria-label="Ayuda">
     <span class="material-symbols-outlined" aria-hidden="true">help</span>
   </button>
-  <button
-    type="button"
-    class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-fixed text-label-md font-medium text-on-primary-fixed-variant"
-    aria-label="Menú de usuario"
-  >
-    AD
-  </button>
+  <div class="relative">
+    <button
+      type="button"
+      class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-fixed text-label-md font-medium text-on-primary-fixed-variant focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-container"
+      aria-label="Menú de usuario"
+      aria-haspopup="menu"
+      [attr.aria-expanded]="userMenuOpen()"
+      (click)="userMenuOpen.set(!userMenuOpen())"
+    >
+      AD
+    </button>
+
+    @if (userMenuOpen()) {
+      <button
+        type="button"
+        class="fixed inset-0 z-40 cursor-default"
+        aria-label="Cerrar menú de usuario"
+        tabindex="-1"
+        (click)="userMenuOpen.set(false)"
+      ></button>
+      <div
+        role="menu"
+        class="absolute right-0 top-10 z-50 w-56 rounded-lg border border-outline-variant bg-surface-container-lowest py-space-xs shadow-[0px_4px_12px_rgba(15,23,42,0.04)]"
+        (keydown.escape)="userMenuOpen.set(false)"
+      >
+        <button
+          type="button"
+          role="menuitem"
+          class="flex h-9 w-full items-center gap-space-sm px-space-md text-left text-body-md text-danger hover:bg-danger-container focus-visible:outline-2 focus-visible:outline-primary-container"
+          (click)="logout()"
+        >
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">logout</span>
+          Cerrar sesión
+        </button>
+      </div>
+    }
+  </div>
 </header>

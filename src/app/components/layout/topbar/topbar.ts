@@ -1,6 +1,7 @@
 import { Component, inject, input, output, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
+import { AuthService } from '../../../core/services/auth.service';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { viewStateSignal } from '../../../core/utils/view-state';
 
@@ -11,10 +12,19 @@ import { viewStateSignal } from '../../../core/utils/view-state';
 })
 export class Topbar {
   private readonly organizationService = inject(OrganizationService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly title = input.required<string>();
   readonly menuClick = output<void>();
 
   readonly sites = viewStateSignal(this.organizationService.listSites());
   readonly selectedSiteId = signal('all');
+  readonly userMenuOpen = signal(false);
+
+  logout(): void {
+    this.userMenuOpen.set(false);
+    this.authService.logout();
+    this.router.navigateByUrl('/login');
+  }
 }
