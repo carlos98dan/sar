@@ -4,7 +4,7 @@ import { Injectable, inject, signal } from '@angular/core';
 export type Theme = 'light' | 'dark';
 
 /** Clave de localStorage. Debe coincidir con el script de index.html que aplica el tema antes de pintar. */
-const STORAGE_KEY = 'nordic-book-theme';
+const STORAGE_KEY = 'SAR-theme';
 
 /**
  * Modo claro u oscuro. La elección se guarda en el navegador; sin elección guardada se usa la preferencia del sistema.

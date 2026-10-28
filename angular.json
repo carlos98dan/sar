@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "nordic-book": {
+    "SAR": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -24,9 +24,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.css"
-            ]
+            "styles": ["src/styles.css"]
           },
           "configurations": {
             "production": {
@@ -56,10 +54,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "nordic-book:build:production"
+              "buildTarget": "SAR:build:production"
             },
             "development": {
-              "buildTarget": "nordic-book:build:development"
+              "buildTarget": "SAR:build:development"
             }
           },
           "defaultConfiguration": "development"

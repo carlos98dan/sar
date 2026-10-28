@@ -31,7 +31,7 @@ Requisitos: Node.js compatible con Angular 21 y npm 11 (ver `packageManager` en 
 ```bash
 npm install        # instalar dependencias
 npm start          # servidor de desarrollo en http://localhost:4200
-npm run build      # compilación de producción en dist/nordic-book
+npm run build      # compilación de producción en dist/SAR
 npm test           # pruebas unitarias con Vitest (ng test)
 ```
 
@@ -138,7 +138,7 @@ Estados de reserva: `draft`, `pending`, `adjustments_requested`, `confirmed`, `r
 
 - Todos los colores salen de tokens definidos con `@theme` en `styles.css` (por ejemplo `bg-surface-container-lowest`). No se usan colores de la paleta por defecto de Tailwind.
 - El modo oscuro redefine esos mismos tokens bajo `:root[data-theme='dark']`.
-- `ThemeService` guarda la elección en `localStorage` con la clave `nordic-book-theme`. Si no hay elección, usa `prefers-color-scheme`.
+- `ThemeService` guarda la elección en `localStorage` con la clave `SAR-theme`. Si no hay elección, usa `prefers-color-scheme`.
 - El script de `index.html` aplica el tema antes de pintar, para evitar un destello claro. Debe usar la misma clave que `ThemeService`.
 
 ---
