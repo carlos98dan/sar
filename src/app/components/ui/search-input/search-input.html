@@ -1,0 +1,15 @@
+<label class="relative block w-full">
+  <span class="sr-only">{{ label() }}</span>
+  <span
+    class="material-symbols-outlined pointer-events-none absolute left-space-sm top-1/2 -translate-y-1/2 text-[18px] text-outline"
+    aria-hidden="true"
+    >search</span
+  >
+  <input
+    type="search"
+    [value]="value()"
+    (input)="value.set($any($event.target).value)"
+    [placeholder]="placeholder()"
+    class="h-9 w-full rounded border border-outline-variant bg-surface-container-lowest pl-9 pr-space-sm text-body-md placeholder:text-outline focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+  />
+</label>

@@ -1,0 +1,142 @@
+<app-page-header
+  title="Disponibilidad"
+  description="Recursos libres para una fecha y una franja horaria. Las reservas canceladas, rechazadas o sin asistencia no bloquean el recurso."
+/>
+
+<div class="mb-space-md flex flex-col gap-space-md">
+  <div class="flex flex-wrap items-end gap-space-md">
+    <app-form-field label="Fecha" controlId="av-date">
+      <input
+        id="av-date"
+        type="date"
+        [value]="date()"
+        (change)="date.set($any($event.target).value)"
+        class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+      />
+    </app-form-field>
+    <app-form-field label="Desde" controlId="av-from">
+      <input
+        id="av-from"
+        type="time"
+        [value]="from()"
+        (change)="from.set($any($event.target).value)"
+        class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+      />
+    </app-form-field>
+    <app-form-field label="Hasta" controlId="av-to">
+      <input
+        id="av-to"
+        type="time"
+        [value]="to()"
+        (change)="to.set($any($event.target).value)"
+        class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+      />
+    </app-form-field>
+    <app-form-field label="Categoría" controlId="av-category">
+      <select
+        id="av-category"
+        [value]="category()"
+        (change)="category.set($any($event.target).value)"
+        class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+      >
+        <option value="all">Todas las categorías</option>
+        @for (item of categories(); track item) {
+          <option [value]="item">{{ item }}</option>
+        }
+      </select>
+    </app-form-field>
+    <app-form-field label="Capacidad mínima" controlId="av-capacity">
+      <input
+        id="av-capacity"
+        type="number"
+        min="0"
+        [value]="minCapacity()"
+        (change)="minCapacity.set(+$any($event.target).value || 0)"
+        class="h-9 w-32 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+      />
+    </app-form-field>
+  </div>
+
+  <div class="flex items-center justify-between gap-space-md">
+    <label class="flex items-center gap-space-sm text-body-md text-on-surface-variant">
+      <input
+        type="checkbox"
+        [checked]="onlyAvailable()"
+        (change)="onlyAvailable.set($any($event.target).checked)"
+        class="h-4 w-4 rounded border-outline-variant accent-primary-container"
+      />
+      Solo disponibles
+    </label>
+    <button type="button" appButton variant="ghost" (click)="clearFilters()">
+      Restablecer filtros
+    </button>
+  </div>
+</div>
+
+@if (!validWindow()) {
+  <app-alert class="mb-space-md" tone="danger" icon="error"
+    >La hora de fin debe ser posterior a la hora de inicio.</app-alert
+  >
+}
+
+@if (data(); as state) {
+  @if (state.status === 'loading') {
+    <app-state-panel kind="loading" />
+  } @else if (state.status === 'error') {
+    <app-state-panel kind="error" [message]="state.message" />
+  } @else if (validWindow()) {
+    @if (rows().length === 0) {
+      @if (evaluated().length === 0) {
+        <app-state-panel
+          kind="empty"
+          message="Ningún recurso coincide con los filtros aplicados."
+        />
+      } @else {
+        <app-state-panel kind="empty" message="Ningún recurso está libre en esta franja." />
+      }
+    } @else {
+      <app-table-shell
+        [summary]="
+          availableCount() + ' de ' + evaluated().length + ' recursos disponibles en la franja'
+        "
+      >
+        <table class="w-full min-w-[820px] border-collapse text-left">
+          <caption class="sr-only">
+            Disponibilidad de recursos en la franja seleccionada
+          </caption>
+          <thead
+            class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+          >
+            <tr class="border-b border-outline-variant">
+              <th scope="col" class="h-10 px-space-md font-medium">Recurso</th>
+              <th scope="col" class="h-10 px-space-md font-medium">Categoría</th>
+              <th scope="col" class="h-10 px-space-md text-right font-medium">Capacidad</th>
+              <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+              <th scope="col" class="h-10 px-space-md font-medium">Detalle</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container-high text-body-md">
+            @for (row of rows(); track row.resource.id) {
+              <tr class="h-14 hover:bg-surface-container-low">
+                <td class="px-space-md">
+                  <span class="block font-medium text-on-surface">{{ row.resource.name }}</span>
+                  <span class="block text-body-sm text-on-surface-variant"
+                    >{{ row.resource.code }} · {{ row.resource.location }}</span
+                  >
+                </td>
+                <td class="px-space-md text-on-surface-variant">{{ row.resource.category }}</td>
+                <td class="px-space-md text-right tabular-nums text-on-surface">
+                  {{ row.resource.capacity }}
+                </td>
+                <td class="px-space-md">
+                  <app-badge [tone]="row.tone">{{ row.label }}</app-badge>
+                </td>
+                <td class="px-space-md text-on-surface-variant">{{ row.detail }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </app-table-shell>
+    }
+  }
+}

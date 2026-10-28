@@ -1,25 +1,12 @@
 <app-page-header title="Usuarios" description="Cuentas de acceso, roles y sede predeterminada de cada persona.">
-  <button
-    type="button"
-    class="flex h-9 items-center gap-space-sm rounded bg-primary-container px-space-md text-body-md font-medium text-on-primary hover:bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-container"
-  >
+  <button type="button" appButton>
     <span class="material-symbols-outlined text-[18px]" aria-hidden="true">person_add</span>
     Invitar usuario
   </button>
 </app-page-header>
 
 <div class="mb-space-md">
-  <label class="relative block w-full md:w-96">
-    <span class="sr-only">Buscar usuarios</span>
-    <span class="material-symbols-outlined pointer-events-none absolute left-space-sm top-1/2 -translate-y-1/2 text-[18px] text-outline" aria-hidden="true">search</span>
-    <input
-      type="search"
-      [value]="query()"
-      (input)="query.set($any($event.target).value)"
-      placeholder="Buscar por nombre, correo, rol o área"
-      class="h-9 w-full rounded border border-outline-variant bg-surface-container-lowest pl-9 pr-space-sm text-body-md placeholder:text-outline focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
-    />
-  </label>
+  <app-search-input label="Buscar usuarios" placeholder="Buscar por nombre, correo, rol o área" class="md:w-96" [(value)]="query" />
 </div>
 
 @if (users(); as state) {
@@ -30,52 +17,47 @@
   } @else if (filtered().length === 0) {
     <app-state-panel kind="empty" message="No hay usuarios que coincidan con la búsqueda." />
   } @else {
-    <div class="overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest">
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[820px] border-collapse text-left">
-          <caption class="sr-only">Listado de usuarios</caption>
-          <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
-            <tr class="border-b border-outline-variant">
-              <th scope="col" class="h-10 px-space-md font-medium">Nombre</th>
-              <th scope="col" class="h-10 px-space-md font-medium">Rol</th>
-              <th scope="col" class="h-10 px-space-md font-medium">Departamento</th>
-              <th scope="col" class="h-10 px-space-md font-medium">Sede predeterminada</th>
-              <th scope="col" class="h-10 px-space-md font-medium">Último acceso</th>
-              <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+    <app-table-shell [summary]="filtered().length + ' de ' + state.data.length + ' usuarios'">
+      <table class="w-full min-w-[820px] border-collapse text-left">
+        <caption class="sr-only">Listado de usuarios</caption>
+        <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
+          <tr class="border-b border-outline-variant">
+            <th scope="col" class="h-10 px-space-md font-medium">Nombre</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Rol</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Departamento</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Sede predeterminada</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Último acceso</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-container-high text-body-md">
+          @for (user of filtered(); track user.id) {
+            <tr class="h-14 hover:bg-surface-container-low">
+              <td class="px-space-md">
+                <span class="block font-medium text-on-surface">{{ user.fullName }}</span>
+                <span class="block text-body-sm text-on-surface-variant">{{ user.email }}</span>
+              </td>
+              <td class="px-space-md text-on-surface">{{ roleLabels[user.role] }}</td>
+              <td class="px-space-md text-on-surface-variant">{{ user.department }}</td>
+              <td class="px-space-md text-on-surface-variant">{{ user.defaultSiteName }}</td>
+              <td class="px-space-md tabular-nums text-on-surface-variant">
+                @if (user.lastAccessAt; as last) {
+                  {{ last | date: 'dd/MM/yyyy HH:mm' : 'America/Bogota' }}
+                } @else {
+                  Nunca
+                }
+              </td>
+              <td class="px-space-md">
+                @if (user.active) {
+                  <app-badge tone="success">Activo</app-badge>
+                } @else {
+                  <app-badge tone="neutral">Inactivo</app-badge>
+                }
+              </td>
             </tr>
-          </thead>
-          <tbody class="divide-y divide-surface-container-high text-body-md">
-            @for (user of filtered(); track user.id) {
-              <tr class="h-14 hover:bg-surface-container-low">
-                <td class="px-space-md">
-                  <span class="block font-medium text-on-surface">{{ user.fullName }}</span>
-                  <span class="block text-body-sm text-on-surface-variant">{{ user.email }}</span>
-                </td>
-                <td class="px-space-md text-on-surface">{{ roleLabels[user.role] }}</td>
-                <td class="px-space-md text-on-surface-variant">{{ user.department }}</td>
-                <td class="px-space-md text-on-surface-variant">{{ user.defaultSiteName }}</td>
-                <td class="px-space-md tabular-nums text-on-surface-variant">
-                  @if (user.lastAccessAt; as last) {
-                    {{ last | date: 'dd/MM/yyyy HH:mm' : 'America/Bogota' }}
-                  } @else {
-                    Nunca
-                  }
-                </td>
-                <td class="px-space-md">
-                  @if (user.active) {
-                    <app-badge tone="success">Activo</app-badge>
-                  } @else {
-                    <app-badge tone="neutral">Inactivo</app-badge>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <div class="flex h-12 items-center border-t border-outline-variant px-space-md text-body-sm text-on-surface-variant">
-        {{ filtered().length }} de {{ state.data.length }} usuarios
-      </div>
-    </div>
+          }
+        </tbody>
+      </table>
+    </app-table-shell>
   }
 }

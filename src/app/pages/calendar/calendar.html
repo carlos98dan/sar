@@ -47,9 +47,8 @@
     <app-state-panel kind="error" message="No se pudo cargar el calendario. Intenta nuevamente." />
   }
   @default {
-    <div class="overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest">
-      <div class="overflow-x-auto">
-        <div class="min-w-[900px]">
+    <app-table-shell>
+      <div class="min-w-[900px]">
           <div class="grid grid-cols-[220px_1fr] border-b border-outline-variant bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
             <div class="px-space-md py-space-sm font-medium">Recurso</div>
             <div class="grid grid-cols-[repeat(14,minmax(0,1fr))]">
@@ -98,8 +97,7 @@
             <app-state-panel kind="empty" message="No hay recursos configurados para esta sede." />
           }
         </div>
-      </div>
-    </div>
+    </app-table-shell>
 
     @if (selected(); as reservation) {
       <section aria-label="Detalle de la reserva seleccionada" class="mt-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg">

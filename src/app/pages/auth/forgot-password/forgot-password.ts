@@ -2,11 +2,16 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { Alert } from '../../../components/ui/alert/alert';
+import { AuthLayout } from '../../../components/ui/auth-layout/auth-layout';
+import { Button } from '../../../components/ui/button/button';
+import { FormField } from '../../../components/ui/form-field/form-field';
+import { SectionCard } from '../../../components/ui/section-card/section-card';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Alert, AuthLayout, Button, FormField, SectionCard],
   templateUrl: './forgot-password.html',
 })
 export class ForgotPassword {

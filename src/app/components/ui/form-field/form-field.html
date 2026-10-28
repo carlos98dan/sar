@@ -1,0 +1,5 @@
+<label [for]="controlId()" class="text-label-md text-on-surface">{{ label() }}</label>
+<ng-content />
+@if (error()) {
+  <p [id]="controlId() + '-error'" class="text-body-sm text-danger">{{ error() }}</p>
+}

@@ -2,13 +2,17 @@ import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
+import { Alert } from '../../components/ui/alert/alert';
+import { Button } from '../../components/ui/button/button';
+import { FormField } from '../../components/ui/form-field/form-field';
 import { PageHeader } from '../../components/ui/page-header/page-header';
+import { SectionCard } from '../../components/ui/section-card/section-card';
 import { Organization } from '../../core/models/organization.model';
 import { OrganizationService } from '../../core/services/organization.service';
 
 @Component({
   selector: 'app-settings',
-  imports: [ReactiveFormsModule, PageHeader],
+  imports: [ReactiveFormsModule, Alert, Button, FormField, PageHeader, SectionCard],
   templateUrl: './settings.html',
 })
 export class Settings {

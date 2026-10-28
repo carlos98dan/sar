@@ -2,10 +2,7 @@
   title="Resumen del día"
   [description]="'Operación de hoy, ' + (today | date: 'dd/MM/yyyy') + ' · Hora de Bogotá (UTC-5)'"
 >
-  <a
-    routerLink="/reservas"
-    class="flex h-9 items-center gap-space-sm rounded border border-outline-variant bg-surface-container-lowest px-space-md text-body-md font-medium text-on-surface hover:bg-surface-container-high"
-  >
+  <a routerLink="/reservas" appButton variant="outline">
     <span class="material-symbols-outlined text-[18px]" aria-hidden="true">pending_actions</span>
     Revisar solicitudes
   </a>
@@ -49,7 +46,7 @@
     </section>
 
     <section class="mt-space-lg grid gap-gutter xl:grid-cols-3">
-      <div class="rounded-lg border border-outline-variant bg-surface-container-lowest xl:col-span-2">
+      <app-section-card class="xl:col-span-2" padding="none">
         <div class="flex h-12 items-center justify-between border-b border-outline-variant px-space-lg">
           <h2 class="font-headline text-headline-sm text-on-surface">Próximas reservas</h2>
           <a routerLink="/calendario" class="text-label-md font-medium text-primary hover:underline">Ver calendario</a>
@@ -68,9 +65,9 @@
             </li>
           }
         </ul>
-      </div>
+      </app-section-card>
 
-      <div class="rounded-lg border border-outline-variant bg-surface-container-lowest">
+      <app-section-card padding="none">
         <div class="flex h-12 items-center border-b border-outline-variant px-space-lg">
           <h2 class="font-headline text-headline-sm text-on-surface">Accesos rápidos</h2>
         </div>
@@ -83,12 +80,12 @@
             Estado de recursos
             <span class="material-symbols-outlined text-[18px] text-outline" aria-hidden="true">chevron_right</span>
           </a>
-          <a routerLink="/calendario" class="flex items-center justify-between rounded border border-outline-variant px-space-md py-space-sm text-body-md text-on-surface hover:bg-surface-container-low">
+          <a routerLink="/disponibilidad" class="flex items-center justify-between rounded border border-outline-variant px-space-md py-space-sm text-body-md text-on-surface hover:bg-surface-container-low">
             Disponibilidad por franja
             <span class="material-symbols-outlined text-[18px] text-outline" aria-hidden="true">chevron_right</span>
           </a>
         </div>
-      </div>
+      </app-section-card>
     </section>
   }
 }

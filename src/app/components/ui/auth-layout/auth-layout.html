@@ -1,0 +1,15 @@
+<main class="flex min-h-dvh items-center justify-center p-gutter">
+  <div class="w-full max-w-[400px]">
+    <div class="mb-space-lg flex flex-col items-center gap-space-sm text-center">
+      <span
+        class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-container font-headline text-headline-md text-on-primary"
+        aria-hidden="true"
+        >R</span
+      >
+      <h1 class="font-headline text-headline-lg text-on-surface">{{ title() }}</h1>
+      <p class="text-body-md text-on-surface-variant">{{ description() }}</p>
+    </div>
+
+    <ng-content />
+  </div>
+</main>

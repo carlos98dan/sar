@@ -1,18 +1,22 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 
+import { Button } from '../../components/ui/button/button';
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { ReservationStatusBadge } from '../../components/ui/reservation-status-badge/reservation-status-badge';
+import { SearchInput } from '../../components/ui/search-input/search-input';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
+import { TableShell } from '../../components/ui/table-shell/table-shell';
 import { Reservation, ReservationStatus } from '../../core/models/reservation.model';
 import { ReservationService } from '../../core/services/reservation.service';
+import { matchesQuery } from '../../core/utils/search';
 import { viewStateSignal } from '../../core/utils/view-state';
 
 type StatusFilter = ReservationStatus | 'all';
 
 @Component({
   selector: 'app-reservations',
-  imports: [DatePipe, PageHeader, ReservationStatusBadge, StatePanel],
+  imports: [DatePipe, Button, PageHeader, ReservationStatusBadge, SearchInput, StatePanel, TableShell],
   templateUrl: './reservations.html',
 })
 export class Reservations {
@@ -39,16 +43,18 @@ export class Reservations {
       return [];
     }
 
-    const term = this.query().trim().toLowerCase();
     const status = this.status();
 
     return state.data
       .filter(
         (reservation) =>
           (status === 'all' || reservation.status === status) &&
-          (!term ||
-            [reservation.code, reservation.title, reservation.resource.name, reservation.requester.name]
-              .some((value) => value.toLowerCase().includes(term))),
+          matchesQuery(this.query(), [
+            reservation.code,
+            reservation.title,
+            reservation.resource.name,
+            reservation.requester.name,
+          ]),
       )
       .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
   });

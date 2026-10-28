@@ -9,6 +9,7 @@ import { authGuard } from './core/guards/auth.guard';
 const IMPLEMENTED: Record<string, () => Promise<Type<unknown>>> = {
   '': () => import('./pages/dashboard/dashboard').then((m) => m.Dashboard),
   calendario: () => import('./pages/calendar/calendar').then((m) => m.Calendar),
+  disponibilidad: () => import('./pages/availability/availability').then((m) => m.Availability),
   reservas: () => import('./pages/reservations/reservations').then((m) => m.Reservations),
   recursos: () => import('./pages/resources/resources').then((m) => m.Resources),
   organizacion: () => import('./pages/settings/settings').then((m) => m.Settings),

@@ -2,10 +2,14 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 
 import { Badge } from '../../components/ui/badge/badge';
+import { Button } from '../../components/ui/button/button';
 import { PageHeader } from '../../components/ui/page-header/page-header';
+import { SearchInput } from '../../components/ui/search-input/search-input';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
+import { TableShell } from '../../components/ui/table-shell/table-shell';
 import { User, UserRole } from '../../core/models/user.model';
 import { UserService } from '../../core/services/user.service';
+import { matchesQuery } from '../../core/utils/search';
 import { viewStateSignal } from '../../core/utils/view-state';
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -19,7 +23,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 
 @Component({
   selector: 'app-users',
-  imports: [DatePipe, Badge, PageHeader, StatePanel],
+  imports: [DatePipe, Badge, Button, PageHeader, SearchInput, StatePanel, TableShell],
   templateUrl: './users.html',
 })
 export class Users {
@@ -36,14 +40,8 @@ export class Users {
       return [];
     }
 
-    const term = this.query().trim().toLowerCase();
-
-    return state.data.filter(
-      (user) =>
-        !term ||
-        [user.fullName, user.email, user.department, ROLE_LABELS[user.role]].some((value) =>
-          value.toLowerCase().includes(term),
-        ),
+    return state.data.filter((user) =>
+      matchesQuery(this.query(), [user.fullName, user.email, user.department, ROLE_LABELS[user.role]]),
     );
   });
 }

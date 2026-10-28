@@ -4,10 +4,12 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { ReservationStatusBadge } from '../../components/ui/reservation-status-badge/reservation-status-badge';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
+import { TableShell } from '../../components/ui/table-shell/table-shell';
 import { Reservation, ReservationStatus } from '../../core/models/reservation.model';
 import { Resource } from '../../core/models/resource.model';
 import { ReservationService } from '../../core/services/reservation.service';
 import { ResourceService } from '../../core/services/resource.service';
+import { isoTimeToMinutes, toDateKey } from '../../core/utils/time';
 import { viewStateSignal } from '../../core/utils/view-state';
 
 /** Franja visible del calendario: 07:00 a 21:00. */
@@ -36,22 +38,9 @@ interface CalendarRow {
   blocks: TimeBlock[];
 }
 
-function toMinutes(isoTime: string): number {
-  const [hours, minutes] = isoTime.slice(11, 16).split(':').map(Number);
-  return hours * 60 + minutes;
-}
-
-function toDateKey(date: Date): string {
-  return [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, '0'),
-    String(date.getDate()).padStart(2, '0'),
-  ].join('-');
-}
-
 @Component({
   selector: 'app-calendar',
-  imports: [DatePipe, PageHeader, ReservationStatusBadge, StatePanel],
+  imports: [DatePipe, PageHeader, ReservationStatusBadge, StatePanel, TableShell],
   templateUrl: './calendar.html',
 })
 export class Calendar {
@@ -94,8 +83,8 @@ export class Calendar {
       const blocks: TimeBlock[] = reservations.data
         .filter((reservation) => reservation.resource.id === resource.id && reservation.startsAt.startsWith(day))
         .map((reservation) => {
-          const start = toMinutes(reservation.startsAt);
-          const end = toMinutes(reservation.endsAt);
+          const start = isoTimeToMinutes(reservation.startsAt);
+          const end = isoTimeToMinutes(reservation.endsAt);
           const kind: BlockKind = INACTIVE_STATUSES.includes(reservation.status)
             ? 'inactive'
             : reservation.status === 'confirmed' || reservation.status === 'in_progress' || reservation.status === 'completed'
