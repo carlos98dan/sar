@@ -1,0 +1,105 @@
+<app-page-header
+  title="Auditoría"
+  description="Historial de acciones sobre las reservas: quién las realizó, cuándo y con qué comentario."
+/>
+
+<div class="mb-space-md flex flex-col gap-space-md xl:flex-row xl:flex-wrap xl:items-end">
+  <app-search-input
+    label="Buscar en el registro"
+    placeholder="Buscar por código, acción, responsable o comentario"
+    class="xl:w-96"
+    [(value)]="query"
+  />
+  <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+    Acción
+    <select
+      [value]="action()"
+      (change)="action.set($any($event.target).value)"
+      class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+    >
+      <option value="all">Todas las acciones</option>
+      @for (item of actions(); track item) {
+        <option [value]="item">{{ item }}</option>
+      }
+    </select>
+  </label>
+  <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+    Desde
+    <input
+      type="date"
+      [value]="from()"
+      (change)="from.set($any($event.target).value)"
+      class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+    />
+  </label>
+  <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+    Hasta
+    <input
+      type="date"
+      [value]="to()"
+      (change)="to.set($any($event.target).value)"
+      class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+    />
+  </label>
+  @if (hasFilters()) {
+    <button type="button" appButton variant="ghost" class="h-9" (click)="clearFilters()">
+      Limpiar filtros
+    </button>
+  }
+</div>
+
+@if (records(); as state) {
+  @if (state.status === 'loading') {
+    <app-state-panel kind="loading" />
+  } @else if (state.status === 'error') {
+    <app-state-panel kind="error" [message]="state.message" />
+  } @else if (state.data.length === 0) {
+    <app-state-panel kind="empty" message="Aún no hay acciones registradas en esta sesión." />
+  } @else if (filtered().length === 0) {
+    <app-state-panel kind="empty" message="Ninguna acción coincide con los filtros aplicados." />
+  } @else {
+    <app-table-shell [summary]="filtered().length + ' de ' + state.data.length + ' acciones'">
+      <table class="w-full min-w-[900px] border-collapse text-left">
+        <caption class="sr-only">
+          Registro de acciones sobre reservas
+        </caption>
+        <thead
+          class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+        >
+          <tr class="border-b border-outline-variant">
+            <th scope="col" class="h-10 px-space-md font-medium">Fecha</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Reserva</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Acción</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Estado resultante</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Responsable</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Comentario</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-container-high text-body-md">
+          @for (record of filtered(); track record.id) {
+            <tr class="hover:bg-surface-container-low">
+              <td class="px-space-md tabular-nums text-on-surface-variant">
+                {{ record.at | date: 'dd/MM/yyyy HH:mm' : 'America/Bogota' }}
+              </td>
+              <td class="px-space-md">
+                <a
+                  [routerLink]="['/reservas', record.reservationId]"
+                  class="font-medium tabular-nums text-primary hover:underline"
+                  >{{ record.reservationCode }}</a
+                >
+              </td>
+              <td class="px-space-md text-on-surface">{{ record.action }}</td>
+              <td class="px-space-md">
+                <app-reservation-status-badge [status]="record.status" />
+              </td>
+              <td class="px-space-md text-on-surface-variant">{{ record.actorName }}</td>
+              <td class="px-space-md text-body-sm text-on-surface-variant">
+                {{ record.comment || '—' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-table-shell>
+  }
+}

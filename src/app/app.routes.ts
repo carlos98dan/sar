@@ -25,6 +25,7 @@ const IMPLEMENTED: Record<string, () => Promise<Type<unknown>>> = {
   roles: () => import('./pages/roles/roles').then((m) => m.Roles),
   notificaciones: () => import('./pages/notifications/notifications').then((m) => m.Notifications),
   reportes: () => import('./pages/reports/reports').then((m) => m.Reports),
+  auditoria: () => import('./pages/audit/audit').then((m) => m.Audit),
   organizacion: () => import('./pages/settings/settings').then((m) => m.Settings),
   usuarios: () => import('./pages/users/users').then((m) => m.Users),
 };
