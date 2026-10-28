@@ -1,0 +1,201 @@
+<app-page-header
+  title="Flujos de aprobación"
+  description="Define qué pasos debe aprobar una reserva según su categoría. Los cambios se mantienen durante la sesión."
+/>
+
+<div class="grid gap-gutter xl:grid-cols-3">
+  <app-section-card class="xl:col-span-1">
+    <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+      {{ editing() ? 'Editar flujo' : 'Nuevo flujo' }}
+    </h2>
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate class="flex flex-col gap-space-md">
+      <app-form-field
+        label="Nombre"
+        controlId="flow-name"
+        [error]="
+          form.controls.name.touched && form.controls.name.invalid
+            ? 'Ingresa un nombre de hasta 80 caracteres.'
+            : ''
+        "
+      >
+        <input
+          id="flow-name"
+          formControlName="name"
+          [class]="inputClass"
+          [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+        />
+      </app-form-field>
+
+      <app-form-field label="Aplica a" controlId="flow-category">
+        <select id="flow-category" formControlName="category" [class]="inputClass">
+          <option value="">Todas las categorías</option>
+          @for (category of activeCategories(); track category.id) {
+            <option [value]="category.name">{{ category.name }}</option>
+          }
+        </select>
+      </app-form-field>
+
+      <fieldset class="flex flex-col gap-space-sm">
+        <legend class="text-label-md text-on-surface">Pasos de aprobación</legend>
+
+        @if (steps().length === 0) {
+          <p class="text-body-sm text-on-surface-variant">Agrega al menos un paso.</p>
+        } @else {
+          <ol
+            class="flex flex-col divide-y divide-surface-container-high rounded border border-outline-variant"
+          >
+            @for (role of steps(); track $index; let i = $index) {
+              <li class="flex items-center justify-between gap-space-sm px-space-sm py-space-xs">
+                <span class="text-body-md text-on-surface">
+                  <span class="tabular-nums text-on-surface-variant">{{ i + 1 }}.</span>
+                  {{ roleLabel(role) }}
+                </span>
+                <span class="flex items-center gap-space-xs">
+                  <button
+                    type="button"
+                    appButton
+                    variant="ghost"
+                    class="h-8"
+                    [disabled]="i === 0"
+                    [attr.aria-label]="'Subir ' + roleLabel(role)"
+                    (click)="moveStep(i, -1)"
+                  >
+                    Subir
+                  </button>
+                  <button
+                    type="button"
+                    appButton
+                    variant="ghost"
+                    class="h-8"
+                    [disabled]="i === steps().length - 1"
+                    [attr.aria-label]="'Bajar ' + roleLabel(role)"
+                    (click)="moveStep(i, 1)"
+                  >
+                    Bajar
+                  </button>
+                  <button
+                    type="button"
+                    appButton
+                    variant="ghost"
+                    class="h-8"
+                    [attr.aria-label]="'Quitar ' + roleLabel(role)"
+                    (click)="removeStep(i)"
+                  >
+                    Quitar
+                  </button>
+                </span>
+              </li>
+            }
+          </ol>
+        }
+
+        <div class="flex items-center gap-space-sm">
+          <label class="sr-only" for="flow-step-role">Rol del paso</label>
+          <select
+            id="flow-step-role"
+            [value]="stepRole()"
+            (change)="stepRole.set($any($event.target).value)"
+            [class]="inputClass"
+          >
+            @for (role of roleOptions; track role) {
+              <option [value]="role">{{ roleLabel(role) }}</option>
+            }
+          </select>
+          <button type="button" appButton variant="outline" (click)="addStep()">
+            Agregar paso
+          </button>
+        </div>
+
+        @if (stepsMissing()) {
+          <p id="flow-steps-error" class="text-body-sm text-danger">
+            Agrega al menos un paso antes de guardar.
+          </p>
+        }
+      </fieldset>
+
+      <div class="flex items-center gap-space-sm">
+        <button type="submit" appButton>
+          {{ editing() ? 'Guardar cambios' : 'Crear flujo' }}
+        </button>
+        @if (editing()) {
+          <button type="button" appButton variant="outline" (click)="cancelEdit()">Cancelar</button>
+        }
+      </div>
+    </form>
+  </app-section-card>
+
+  @if (flows().length === 0) {
+    <div class="xl:col-span-2">
+      <app-state-panel kind="empty" message="No hay flujos de aprobación configurados." />
+    </div>
+  } @else {
+    <app-table-shell class="xl:col-span-2" [summary]="flows().length + ' flujos'">
+      <table class="w-full min-w-[640px] border-collapse text-left">
+        <caption class="sr-only">
+          Flujos de aprobación
+        </caption>
+        <thead
+          class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+        >
+          <tr class="border-b border-outline-variant">
+            <th scope="col" class="h-10 px-space-md font-medium">Flujo</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Pasos</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+            <th scope="col" class="h-10 px-space-md font-medium">
+              <span class="sr-only">Acciones</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-container-high text-body-md">
+          @for (flow of flows(); track flow.id) {
+            <tr class="h-14 hover:bg-surface-container-low">
+              <td class="px-space-md">
+                <span class="block font-medium text-on-surface">{{ flow.name }}</span>
+                <span class="block text-body-sm text-on-surface-variant">{{
+                  categoryLabel(flow)
+                }}</span>
+              </td>
+              <td class="px-space-md text-on-surface-variant">
+                @for (role of flow.steps; track $index; let last = $last) {
+                  <span>{{ roleLabel(role) }}</span>
+                  @if (!last) {
+                    <span aria-hidden="true"> → </span>
+                  }
+                }
+              </td>
+              <td class="px-space-md">
+                <app-badge [tone]="flow.active ? 'success' : 'neutral'">
+                  {{ flow.active ? 'Activo' : 'Inactivo' }}
+                </app-badge>
+              </td>
+              <td class="px-space-md">
+                <div class="flex items-center justify-end gap-space-xs">
+                  <button
+                    type="button"
+                    appButton
+                    variant="ghost"
+                    class="h-8"
+                    [attr.aria-label]="'Editar ' + flow.name"
+                    (click)="startEdit(flow)"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    appButton
+                    variant="ghost"
+                    class="h-8"
+                    [attr.aria-label]="(flow.active ? 'Desactivar ' : 'Activar ') + flow.name"
+                    (click)="toggle(flow)"
+                  >
+                    {{ flow.active ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-table-shell>
+  }
+</div>

@@ -1,6 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 
 import { DEFAULT_RULES, HOURLY_RATES } from '../config/booking-config';
+import { ApprovalFlow } from '../models/approval-flow.model';
+import { upsert } from '../utils/collections';
 import { BookingRule } from '../utils/rules';
 
 export type BlockType =
@@ -90,6 +92,23 @@ export class OperationsStore {
 
   readonly rates = signal<Record<string, number>>({ ...HOURLY_RATES });
 
+  readonly approvalFlows = signal<ApprovalFlow[]>([
+    {
+      id: 'flow-auditorios',
+      name: 'Eventos en auditorios',
+      category: 'Auditorios y eventos',
+      steps: ['site_coordinator', 'approver'],
+      active: true,
+    },
+    {
+      id: 'flow-vehiculos',
+      name: 'Uso de vehículos',
+      category: 'Vehículos',
+      steps: ['approver'],
+      active: true,
+    },
+  ]);
+
   addBlock(block: Block): void {
     this.blocks.update((items) => [...items, block]);
   }
@@ -112,5 +131,9 @@ export class OperationsStore {
 
   setRate(resourceId: string, amount: number): void {
     this.rates.update((items) => ({ ...items, [resourceId]: amount }));
+  }
+
+  saveApprovalFlow(flow: ApprovalFlow): void {
+    this.approvalFlows.update((items) => upsert(items, flow));
   }
 }

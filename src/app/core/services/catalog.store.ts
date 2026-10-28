@@ -1,12 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 
 import { ManagedSite, ResourceCategory, ResourceType, SiteLocation } from '../models/catalog.model';
-
-function upsert<T extends { id: string }>(items: T[], item: T): T[] {
-  return items.some((current) => current.id === item.id)
-    ? items.map((current) => (current.id === item.id ? item : current))
-    : [...items, item];
-}
+import { upsert } from '../utils/collections';
 
 /**
  * Catálogos de la sesión: categorías y tipos de recursos, sedes y ubicaciones.

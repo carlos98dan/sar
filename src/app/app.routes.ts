@@ -21,6 +21,7 @@ const IMPLEMENTED: Record<string, () => Promise<Type<unknown>>> = {
   horarios: () => import('./pages/schedules/schedules').then((m) => m.Schedules),
   reglas: () => import('./pages/rules/rules').then((m) => m.Rules),
   tarifas: () => import('./pages/rates/rates').then((m) => m.Rates),
+  'flujos-aprobacion': () => import('./pages/approval-flows/approval-flows').then((m) => m.ApprovalFlows),
   organizacion: () => import('./pages/settings/settings').then((m) => m.Settings),
   usuarios: () => import('./pages/users/users').then((m) => m.Users),
 };
