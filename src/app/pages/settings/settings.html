@@ -1,0 +1,83 @@
+<app-page-header title="Configuración" description="Datos generales de la organización, zona horaria y formatos regionales.">
+  <button
+    type="button"
+    [disabled]="saving()"
+    (click)="save()"
+    class="flex h-9 items-center gap-space-sm rounded bg-primary-container px-space-md text-body-md font-medium text-on-primary hover:bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-container disabled:cursor-not-allowed disabled:opacity-60"
+  >
+    @if (saving()) {
+      <span class="material-symbols-outlined animate-spin text-[18px]" aria-hidden="true">progress_activity</span>
+    }
+    Guardar cambios
+  </button>
+</app-page-header>
+
+@if (saved()) {
+  <div role="status" class="mb-space-md flex items-center gap-space-sm rounded border border-success/30 bg-success-container p-space-md text-body-md text-success">
+    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">check_circle</span>
+    Configuración guardada.
+  </div>
+}
+@if (errorMessage()) {
+  <div role="alert" class="mb-space-md flex items-center gap-space-sm rounded border border-danger/30 bg-danger-container p-space-md text-body-md text-danger">
+    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">error</span>
+    {{ errorMessage() }}
+  </div>
+}
+
+<form [formGroup]="form" novalidate class="grid gap-gutter xl:grid-cols-3">
+  <section class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg xl:col-span-2">
+    <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Identificación</h2>
+    <div class="grid gap-space-md sm:grid-cols-2">
+      <div class="flex flex-col gap-space-xs sm:col-span-2">
+        <label for="org-name" class="text-label-md text-on-surface">Nombre de la organización</label>
+        <input id="org-name" formControlName="name" class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container" [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid" />
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <p class="text-body-sm text-danger">Ingresa el nombre de la organización (máximo 120 caracteres).</p>
+        }
+      </div>
+      <div class="flex flex-col gap-space-xs">
+        <label for="org-tax" class="text-label-md text-on-surface">NIT</label>
+        <input id="org-tax" formControlName="taxId" class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container" />
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg">
+    <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Formatos regionales</h2>
+    <div class="flex flex-col gap-space-md">
+      <div class="flex flex-col gap-space-xs">
+        <label for="org-tz" class="text-label-md text-on-surface">Zona horaria</label>
+        <select id="org-tz" formControlName="timezone" class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container">
+          @for (zone of timezones; track zone) {
+            <option [value]="zone">{{ zone }}</option>
+          }
+        </select>
+      </div>
+      <div class="flex flex-col gap-space-xs">
+        <label for="org-currency" class="text-label-md text-on-surface">Moneda</label>
+        <select id="org-currency" formControlName="currency" class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container">
+          @for (currency of currencies; track currency) {
+            <option [value]="currency">{{ currency }}</option>
+          }
+        </select>
+      </div>
+      <div class="flex flex-col gap-space-xs">
+        <label for="org-date" class="text-label-md text-on-surface">Formato de fecha</label>
+        <select id="org-date" formControlName="dateFormat" class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container">
+          @for (format of dateFormats; track format) {
+            <option [value]="format">{{ format }}</option>
+          }
+        </select>
+      </div>
+      <div class="flex flex-col gap-space-xs">
+        <label for="org-time" class="text-label-md text-on-surface">Formato de hora</label>
+        <select id="org-time" formControlName="timeFormat" class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container">
+          @for (format of timeFormats; track format) {
+            <option [value]="format">{{ format }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </section>
+</form>

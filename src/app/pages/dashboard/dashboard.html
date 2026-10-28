@@ -1,0 +1,94 @@
+<app-page-header
+  title="Resumen del día"
+  [description]="'Operación de hoy, ' + (today | date: 'dd/MM/yyyy') + ' · Hora de Bogotá (UTC-5)'"
+>
+  <a
+    routerLink="/reservas"
+    class="flex h-9 items-center gap-space-sm rounded border border-outline-variant bg-surface-container-lowest px-space-md text-body-md font-medium text-on-surface hover:bg-surface-container-high"
+  >
+    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">pending_actions</span>
+    Revisar solicitudes
+  </a>
+</app-page-header>
+
+@if (summary(); as state) {
+  @if (state.status === 'loading') {
+    <app-state-panel kind="loading" />
+  } @else if (state.status === 'error') {
+    <app-state-panel kind="error" [message]="state.message" />
+  } @else {
+    <section aria-label="Indicadores" class="grid grid-cols-1 gap-gutter sm:grid-cols-2 xl:grid-cols-4">
+      <app-stat-card
+        label="Reservas de hoy"
+        icon="confirmation_number"
+        [value]="state.data.today.reservations"
+        [hint]="state.data.today.confirmed + ' confirmadas · ' + state.data.today.cancelled + ' canceladas'"
+        link="/reservas"
+      />
+      <app-stat-card
+        label="Pendientes de aprobación"
+        icon="pending_actions"
+        [value]="state.data.today.pendingApproval"
+        hint="Requieren una decisión"
+        link="/reservas"
+      />
+      <app-stat-card
+        label="Recursos ocupados"
+        icon="meeting_room"
+        [value]="state.data.resources.occupied"
+        [hint]="state.data.resources.available + ' disponibles ahora'"
+        link="/recursos"
+      />
+      <app-stat-card
+        label="Porcentaje de ocupación"
+        icon="donut_small"
+        [value]="(state.data.resources.occupancyRate * 100).toFixed(0) + '%'"
+        hint="Sobre recursos activos"
+        link="/calendario"
+      />
+    </section>
+
+    <section class="mt-space-lg grid gap-gutter xl:grid-cols-3">
+      <div class="rounded-lg border border-outline-variant bg-surface-container-lowest xl:col-span-2">
+        <div class="flex h-12 items-center justify-between border-b border-outline-variant px-space-lg">
+          <h2 class="font-headline text-headline-sm text-on-surface">Próximas reservas</h2>
+          <a routerLink="/calendario" class="text-label-md font-medium text-primary hover:underline">Ver calendario</a>
+        </div>
+        <ul class="divide-y divide-surface-container-high">
+          @for (reservation of state.data.upcoming; track reservation.id) {
+            <li class="flex flex-col gap-space-xs px-space-lg py-space-md sm:flex-row sm:items-center sm:gap-space-md">
+              <span class="w-[92px] shrink-0 font-medium text-body-md tabular-nums text-on-surface">
+                {{ reservation.startsAt | date: 'HH:mm' : 'America/Bogota' }} – {{ reservation.endsAt | date: 'HH:mm' : 'America/Bogota' }}
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-body-md text-on-surface">{{ reservation.title }}</p>
+                <p class="truncate text-body-sm text-on-surface-variant">{{ reservation.resource.name }} · {{ reservation.requester.name }}</p>
+              </div>
+              <app-reservation-status-badge [status]="reservation.status" />
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="rounded-lg border border-outline-variant bg-surface-container-lowest">
+        <div class="flex h-12 items-center border-b border-outline-variant px-space-lg">
+          <h2 class="font-headline text-headline-sm text-on-surface">Accesos rápidos</h2>
+        </div>
+        <div class="flex flex-col gap-space-sm p-space-lg">
+          <a routerLink="/reservas" class="flex items-center justify-between rounded border border-outline-variant px-space-md py-space-sm text-body-md text-on-surface hover:bg-surface-container-low">
+            Reservas del día
+            <span class="material-symbols-outlined text-[18px] text-outline" aria-hidden="true">chevron_right</span>
+          </a>
+          <a routerLink="/recursos" class="flex items-center justify-between rounded border border-outline-variant px-space-md py-space-sm text-body-md text-on-surface hover:bg-surface-container-low">
+            Estado de recursos
+            <span class="material-symbols-outlined text-[18px] text-outline" aria-hidden="true">chevron_right</span>
+          </a>
+          <a routerLink="/calendario" class="flex items-center justify-between rounded border border-outline-variant px-space-md py-space-sm text-body-md text-on-surface hover:bg-surface-container-low">
+            Disponibilidad por franja
+            <span class="material-symbols-outlined text-[18px] text-outline" aria-hidden="true">chevron_right</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  }
+}

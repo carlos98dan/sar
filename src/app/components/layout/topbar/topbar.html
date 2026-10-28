@@ -1,0 +1,57 @@
+<header class="flex h-14 shrink-0 items-center gap-space-md border-b border-outline-variant bg-surface-container-lowest px-gutter md:px-margin-desktop">
+  <button
+    type="button"
+    class="flex h-9 w-9 items-center justify-center rounded text-secondary hover:bg-surface-container-high md:hidden"
+    aria-label="Abrir menú"
+    (click)="menuClick.emit()"
+  >
+    <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+  </button>
+
+  <div class="flex min-w-0 flex-1 flex-col">
+    <nav aria-label="Breadcrumb" class="hidden text-label-sm text-secondary sm:block">
+      ReserveHub / <span class="text-on-surface-variant">{{ title() }}</span>
+    </nav>
+    <h2 class="truncate font-headline text-headline-md text-on-surface sm:hidden">{{ title() }}</h2>
+  </div>
+
+  @if (sites(); as state) {
+    @if (state.status === 'ready') {
+      <label class="hidden items-center gap-space-sm lg:flex">
+        <span class="sr-only">Sede</span>
+        <select
+          class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md text-on-surface focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+          [value]="selectedSiteId()"
+          (change)="selectedSiteId.set($any($event.target).value)"
+        >
+          <option value="all">Todas las sedes</option>
+          @for (site of state.data; track site.id) {
+            <option [value]="site.id">{{ site.name }}</option>
+          }
+        </select>
+      </label>
+    }
+  }
+
+  <a
+    routerLink="/reservas"
+    class="hidden h-9 items-center gap-space-sm rounded bg-primary-container px-space-md text-body-md font-medium text-on-primary hover:bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-container sm:flex"
+  >
+    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+    Nueva reserva
+  </a>
+
+  <button type="button" class="flex h-9 w-9 items-center justify-center rounded text-secondary hover:bg-surface-container-high" aria-label="Notificaciones">
+    <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+  </button>
+  <button type="button" class="hidden h-9 w-9 items-center justify-center rounded text-secondary hover:bg-surface-container-high sm:flex" aria-label="Ayuda">
+    <span class="material-symbols-outlined" aria-hidden="true">help</span>
+  </button>
+  <button
+    type="button"
+    class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-fixed text-label-md font-medium text-on-primary-fixed-variant"
+    aria-label="Menú de usuario"
+  >
+    AD
+  </button>
+</header>

@@ -1,0 +1,90 @@
+<main class="flex min-h-dvh items-center justify-center p-gutter">
+  <div class="w-full max-w-[400px]">
+    <div class="mb-space-lg flex flex-col items-center gap-space-sm text-center">
+      <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-container font-headline text-headline-md text-on-primary" aria-hidden="true">R</span>
+      <h1 class="font-headline text-headline-lg text-on-surface">Iniciar sesión</h1>
+      <p class="text-body-md text-on-surface-variant">Accede con tu cuenta corporativa de ReserveHub.</p>
+    </div>
+
+    <div class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-xl">
+      @if (errorMessage()) {
+        <div role="alert" class="mb-space-md flex items-start gap-space-sm rounded border border-danger/30 bg-danger-container p-space-md text-body-sm text-danger">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">error</span>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-space-md">
+        <div class="flex flex-col gap-space-xs">
+          <label for="email" class="text-label-md text-on-surface">Correo corporativo</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            autocomplete="username"
+            placeholder="nombre@empresa.co"
+            class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md placeholder:text-outline focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container aria-invalid:border-danger"
+            [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
+            aria-describedby="email-error"
+          />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <p id="email-error" class="text-body-sm text-danger">Ingresa un correo electrónico válido.</p>
+          }
+        </div>
+
+        <div class="flex flex-col gap-space-xs">
+          <div class="flex items-center justify-between">
+            <label for="password" class="text-label-md text-on-surface">Contraseña</label>
+            <a routerLink="/recuperar-contrasena" class="text-label-md text-primary hover:underline">¿Olvidaste tu contraseña?</a>
+          </div>
+          <div class="relative">
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+              class="h-9 w-full rounded border border-outline-variant bg-surface-container-lowest pl-space-sm pr-10 text-body-md focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+              [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid"
+              aria-describedby="password-error"
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-secondary hover:text-on-surface"
+              [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              (click)="showPassword.set(!showPassword())"
+            >
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <p id="password-error" class="text-body-sm text-danger">Ingresa tu contraseña.</p>
+          }
+        </div>
+
+        <label class="flex items-center gap-space-sm text-body-md text-on-surface-variant">
+          <input type="checkbox" formControlName="rememberSession" class="h-4 w-4 rounded border-outline-variant accent-primary-container" />
+          Mantener sesión iniciada en este equipo
+        </label>
+
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="mt-space-sm flex h-9 items-center justify-center gap-space-sm rounded bg-primary-container text-body-md font-medium text-on-primary hover:bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-container disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          @if (submitting()) {
+            <span class="material-symbols-outlined animate-spin text-[18px]" aria-hidden="true">progress_activity</span>
+            <span>Verificando…</span>
+          } @else {
+            <span>Iniciar sesión</span>
+          }
+        </button>
+      </form>
+    </div>
+
+    <p class="mt-space-lg text-center text-body-sm text-on-surface-variant">
+      ¿Necesitas acceso? Contacta a
+      <a href="mailto:soporte@empresademo.co" class="font-medium text-primary hover:underline">soporte</a>.
+      El acceso lo administra tu organización.
+    </p>
+  </div>
+</main>

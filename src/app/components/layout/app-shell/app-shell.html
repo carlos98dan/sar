@@ -1,0 +1,20 @@
+<div class="flex h-dvh overflow-hidden">
+  <app-sidebar [(collapsed)]="collapsed" [(drawerOpen)]="drawerOpen" />
+
+  @if (drawerOpen()) {
+    <button
+      type="button"
+      class="fixed inset-0 z-30 bg-on-surface/40 md:hidden"
+      aria-label="Cerrar menú"
+      (click)="drawerOpen.set(false)"
+    ></button>
+  }
+
+  <div class="flex min-w-0 flex-1 flex-col">
+    <app-topbar [title]="title()" (menuClick)="drawerOpen.set(true)" />
+
+    <main class="flex-1 overflow-y-auto p-gutter md:p-margin-desktop">
+      <router-outlet />
+    </main>
+  </div>
+</div>

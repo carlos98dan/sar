@@ -1,0 +1,42 @@
+<aside [class]="asideClasses()" aria-label="Navegación principal">
+  <div class="flex h-14 items-center gap-space-sm border-b border-outline-variant px-space-md">
+    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-primary-container font-headline text-headline-sm text-on-primary" aria-hidden="true">R</span>
+    @if (!collapsed()) {
+      <div class="min-w-0 flex-1">
+        <p class="font-headline text-headline-sm text-on-surface">ReserveHub</p>
+        @if (organization(); as state) {
+          @if (state.status === 'ready') {
+            <p class="truncate text-label-sm text-secondary">{{ state.data.name }}</p>
+          }
+        }
+      </div>
+    }
+    <button
+      type="button"
+      class="hidden h-8 w-8 shrink-0 items-center justify-center rounded text-secondary hover:bg-surface-container-high md:flex"
+      [attr.aria-label]="collapsed() ? 'Expandir menú' : 'Contraer menú'"
+      (click)="toggleCollapsed()"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">{{ collapsed() ? 'chevron_right' : 'chevron_left' }}</span>
+    </button>
+  </div>
+
+  <nav class="flex-1 space-y-space-xs overflow-y-auto p-space-sm">
+    @for (item of items; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="bg-primary-fixed text-on-primary-fixed-variant"
+        [routerLinkActiveOptions]="{ exact: true }"
+        [attr.aria-label]="collapsed() ? item.label : null"
+        [attr.title]="collapsed() ? item.label : null"
+        class="flex h-9 items-center gap-space-md rounded px-space-sm text-body-md text-secondary transition-colors hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-2 focus-visible:outline-primary-container"
+        (click)="drawerOpen.set(false)"
+      >
+        <span class="material-symbols-outlined shrink-0" aria-hidden="true">{{ item.icon }}</span>
+        @if (!collapsed()) {
+          <span class="truncate">{{ item.label }}</span>
+        }
+      </a>
+    }
+  </nav>
+</aside>

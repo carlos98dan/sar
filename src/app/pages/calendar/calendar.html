@@ -1,0 +1,136 @@
+<app-page-header title="Calendario de recursos" description="Disponibilidad y reservas por recurso. Horario de 07:00 a 21:00.">
+  <div class="flex items-center gap-space-sm">
+    <button
+      type="button"
+      class="flex h-9 w-9 items-center justify-center rounded border border-outline-variant bg-surface-container-lowest text-secondary hover:bg-surface-container-high"
+      aria-label="Día anterior"
+      (click)="shiftDate(-1)"
+    >
+      <span class="material-symbols-outlined text-[18px]" aria-hidden="true">chevron_left</span>
+    </button>
+    <input
+      type="date"
+      aria-label="Fecha"
+      [value]="date()"
+      (change)="date.set($any($event.target).value)"
+      class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+    />
+    <button
+      type="button"
+      class="flex h-9 w-9 items-center justify-center rounded border border-outline-variant bg-surface-container-lowest text-secondary hover:bg-surface-container-high"
+      aria-label="Día siguiente"
+      (click)="shiftDate(1)"
+    >
+      <span class="material-symbols-outlined text-[18px]" aria-hidden="true">chevron_right</span>
+    </button>
+    <button type="button" class="h-9 rounded px-space-md text-label-md font-medium text-primary hover:bg-primary-fixed" (click)="goToToday()">
+      Hoy
+    </button>
+  </div>
+</app-page-header>
+
+<div class="mb-space-md flex flex-wrap items-center gap-space-md text-label-md text-secondary" aria-label="Leyenda">
+  <span class="flex items-center gap-space-xs"><span class="h-3 w-3 rounded-sm border border-primary-container bg-primary-fixed" aria-hidden="true"></span>Confirmada / en curso</span>
+  <span class="flex items-center gap-space-xs"><span class="h-3 w-3 rounded-sm border border-warning bg-warning-container" aria-hidden="true"></span>Pendiente</span>
+  <span class="flex items-center gap-space-xs"><span class="h-3 w-3 rounded-sm border border-outline-variant bg-surface-container-low" aria-hidden="true"></span>Cancelada o rechazada</span>
+  <span class="flex items-center gap-space-xs"><span class="h-3 w-3 rounded-sm ring-2 ring-danger ring-inset bg-surface-container-lowest" aria-hidden="true"></span>Conflicto de horario</span>
+  @if (conflictCount() > 0) {
+    <span class="font-medium text-danger">{{ conflictCount() }} conflicto(s) en el día</span>
+  }
+</div>
+
+@switch (status()) {
+  @case ('loading') {
+    <app-state-panel kind="loading" />
+  }
+  @case ('error') {
+    <app-state-panel kind="error" message="No se pudo cargar el calendario. Intenta nuevamente." />
+  }
+  @default {
+    <div class="overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest">
+      <div class="overflow-x-auto">
+        <div class="min-w-[900px]">
+          <div class="grid grid-cols-[220px_1fr] border-b border-outline-variant bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
+            <div class="px-space-md py-space-sm font-medium">Recurso</div>
+            <div class="grid grid-cols-[repeat(14,minmax(0,1fr))]">
+              @for (hour of hours; track hour) {
+                <span class="border-l border-surface-container-high px-space-xs py-space-sm tabular-nums">{{ hour }}</span>
+              }
+            </div>
+          </div>
+
+          @for (row of rows(); track row.resource.id) {
+            <div class="grid grid-cols-[220px_1fr] border-b border-surface-container-high last:border-b-0">
+              <div class="flex flex-col justify-center gap-space-xs px-space-md py-space-sm">
+                <span class="truncate text-body-md font-medium text-on-surface">{{ row.resource.name }}</span>
+                <span class="truncate text-body-sm text-on-surface-variant">{{ row.resource.code }} · {{ row.resource.location }}</span>
+                @if (row.resource.availability === 'maintenance' || row.resource.availability === 'out_of_service') {
+                  <span class="w-fit rounded border border-danger/30 bg-danger-container px-space-xs text-label-sm text-danger">
+                    {{ row.resource.availability === 'maintenance' ? 'En mantenimiento' : 'Fuera de servicio' }}
+                  </span>
+                }
+              </div>
+
+              <div class="relative h-16">
+                <div class="absolute inset-0 grid grid-cols-[repeat(14,minmax(0,1fr))]" aria-hidden="true">
+                  @for (hour of hours; track hour) {
+                    <span class="border-l border-surface-container-high"></span>
+                  }
+                </div>
+
+                @for (block of row.blocks; track block.reservation.id) {
+                  <button
+                    type="button"
+                    [class]="blockClasses(block)"
+                    [style.left.%]="block.left"
+                    [style.width.%]="block.width"
+                    [attr.aria-label]="block.reservation.code + ', ' + block.reservation.title + ', ' + (block.reservation.startsAt.slice(11, 16)) + ' a ' + (block.reservation.endsAt.slice(11, 16))"
+                    [attr.aria-pressed]="selected()?.id === block.reservation.id"
+                    (click)="selected.set(block.reservation)"
+                  >
+                    <span class="w-full truncate font-medium">{{ block.reservation.title }}</span>
+                    <span class="w-full truncate tabular-nums">{{ block.reservation.startsAt.slice(11, 16) }} – {{ block.reservation.endsAt.slice(11, 16) }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+          } @empty {
+            <app-state-panel kind="empty" message="No hay recursos configurados para esta sede." />
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (selected(); as reservation) {
+      <section aria-label="Detalle de la reserva seleccionada" class="mt-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg">
+        <div class="mb-space-md flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">
+          <div class="min-w-0">
+            <p class="text-label-sm uppercase tracking-wider text-secondary tabular-nums">{{ reservation.code }}</p>
+            <h2 class="font-headline text-headline-md text-on-surface">{{ reservation.title }}</h2>
+          </div>
+          <app-reservation-status-badge [status]="reservation.status" />
+        </div>
+        <dl class="grid grid-cols-1 gap-space-md text-body-md sm:grid-cols-2 xl:grid-cols-4">
+          <div>
+            <dt class="text-label-sm uppercase tracking-wider text-secondary">Recurso</dt>
+            <dd class="text-on-surface">{{ reservation.resource.name }}</dd>
+          </div>
+          <div>
+            <dt class="text-label-sm uppercase tracking-wider text-secondary">Fecha y horario</dt>
+            <dd class="tabular-nums text-on-surface">
+              {{ reservation.startsAt | date: 'dd/MM/yyyy' : 'America/Bogota' }} · {{ reservation.startsAt | date: 'HH:mm' : 'America/Bogota' }} – {{ reservation.endsAt | date: 'HH:mm' : 'America/Bogota' }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-label-sm uppercase tracking-wider text-secondary">Solicitante</dt>
+            <dd class="text-on-surface">{{ reservation.requester.name }} · {{ reservation.requester.department }}</dd>
+          </div>
+          <div>
+            <dt class="text-label-sm uppercase tracking-wider text-secondary">Asistentes</dt>
+            <dd class="tabular-nums text-on-surface">{{ reservation.attendees }}</dd>
+          </div>
+        </dl>
+      </section>
+    }
+  }
+}
