@@ -1,0 +1,234 @@
+<app-page-header
+  title="Reportes y BI"
+  description="Indicadores de reservas por periodo y categoría. Las cifras se calculan con los datos de la sesión."
+>
+  <button
+    type="button"
+    appButton
+    variant="outline"
+    [disabled]="filtered().length === 0"
+    (click)="exportCsv()"
+  >
+    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">download</span>
+    Exportar CSV
+  </button>
+</app-page-header>
+
+<div class="mb-space-md flex flex-col gap-space-md md:flex-row md:flex-wrap md:items-end">
+  <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+    Desde
+    <input
+      type="date"
+      [ngModel]="from()"
+      (ngModelChange)="from.set($event)"
+      class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+    />
+  </label>
+  <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+    Hasta
+    <input
+      type="date"
+      [ngModel]="to()"
+      (ngModelChange)="to.set($event)"
+      class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+    />
+  </label>
+  <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+    Categoría
+    <select
+      [value]="category()"
+      (change)="category.set($any($event.target).value)"
+      class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+    >
+      <option value="all">Todas las categorías</option>
+      @for (item of categories(); track item) {
+        <option [value]="item">{{ item }}</option>
+      }
+    </select>
+  </label>
+  @if (!hasRange()) {
+    <p class="text-body-sm text-danger">
+      La fecha de inicio debe ser anterior o igual a la de fin.
+    </p>
+  }
+</div>
+
+@if (data(); as state) {
+  @if (state.status === 'loading') {
+    <app-state-panel kind="loading" />
+  } @else if (state.status === 'error') {
+    <app-state-panel kind="error" [message]="state.message" />
+  } @else if (filtered().length === 0) {
+    <app-state-panel
+      kind="empty"
+      message="No hay reservas en el periodo y categoría seleccionados."
+    />
+  } @else {
+    <section
+      aria-label="Indicadores"
+      class="grid grid-cols-1 gap-gutter sm:grid-cols-2 xl:grid-cols-4"
+    >
+      <div
+        class="flex flex-col gap-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+      >
+        <span class="text-label-md text-secondary">Reservas en el periodo</span>
+        <span class="font-headline text-headline-xl tabular-nums text-on-surface">{{
+          kpis().total
+        }}</span>
+        <span class="text-body-sm text-on-surface-variant">{{ kpis().approved }} aprobadas</span>
+      </div>
+      <div
+        class="flex flex-col gap-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+      >
+        <span class="text-label-md text-secondary">Tasa de aprobación</span>
+        <span class="font-headline text-headline-xl tabular-nums text-on-surface">{{
+          kpis().approvedRate
+        }}</span>
+        <span class="text-body-sm text-on-surface-variant"
+          >Confirmadas, en curso o finalizadas</span
+        >
+      </div>
+      <div
+        class="flex flex-col gap-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+      >
+        <span class="text-label-md text-secondary">Cancelaciones y rechazos</span>
+        <span class="font-headline text-headline-xl tabular-nums text-on-surface">{{
+          kpis().cancelledRate
+        }}</span>
+        <span class="text-body-sm text-on-surface-variant"
+          >{{ kpis().cancelledOrRejected }} reservas</span
+        >
+      </div>
+      <div
+        class="flex flex-col gap-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+      >
+        <span class="text-label-md text-secondary">No asistencias</span>
+        <span class="font-headline text-headline-xl tabular-nums text-on-surface">{{
+          kpis().noShowRate
+        }}</span>
+        <span class="text-body-sm text-on-surface-variant"
+          >{{ kpis().noShow }} reservas · {{ kpis().attendees }} personas atendidas</span
+        >
+      </div>
+    </section>
+
+    <div class="mt-space-lg grid gap-gutter xl:grid-cols-2">
+      <app-table-shell [summary]="byStatus().length + ' estados'">
+        <table class="w-full min-w-[480px] border-collapse text-left">
+          <caption class="sr-only">
+            Reservas por estado
+          </caption>
+          <thead
+            class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+          >
+            <tr class="border-b border-outline-variant">
+              <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+              <th scope="col" class="h-10 px-space-md text-right font-medium">Reservas</th>
+              <th scope="col" class="h-10 px-space-md text-right font-medium">Horas</th>
+              <th scope="col" class="h-10 px-space-md font-medium">Participación</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container-high text-body-md">
+            @for (item of byStatus(); track item.label) {
+              <tr class="h-12">
+                <td class="px-space-md text-on-surface">{{ item.label }}</td>
+                <td class="px-space-md text-right tabular-nums text-on-surface">
+                  {{ item.count }}
+                </td>
+                <td class="px-space-md text-right tabular-nums text-on-surface-variant">
+                  {{ item.hours }}
+                </td>
+                <td class="px-space-md">
+                  <div class="flex items-center gap-space-sm">
+                    <div class="h-2 w-24 rounded bg-surface-container-high" aria-hidden="true">
+                      <div
+                        class="h-2 rounded bg-primary-container"
+                        [style.width.%]="item.share * 100"
+                      ></div>
+                    </div>
+                    <span class="tabular-nums text-body-sm text-on-surface-variant">{{
+                      percentOf(item.share)
+                    }}</span>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </app-table-shell>
+
+      <app-table-shell [summary]="byCategory().length + ' categorías'">
+        <table class="w-full min-w-[480px] border-collapse text-left">
+          <caption class="sr-only">
+            Reservas por categoría
+          </caption>
+          <thead
+            class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+          >
+            <tr class="border-b border-outline-variant">
+              <th scope="col" class="h-10 px-space-md font-medium">Categoría</th>
+              <th scope="col" class="h-10 px-space-md text-right font-medium">Reservas</th>
+              <th scope="col" class="h-10 px-space-md text-right font-medium">Horas</th>
+              <th scope="col" class="h-10 px-space-md font-medium">Participación</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container-high text-body-md">
+            @for (item of byCategory(); track item.label) {
+              <tr class="h-12">
+                <td class="px-space-md text-on-surface">{{ item.label }}</td>
+                <td class="px-space-md text-right tabular-nums text-on-surface">
+                  {{ item.count }}
+                </td>
+                <td class="px-space-md text-right tabular-nums text-on-surface-variant">
+                  {{ item.hours }}
+                </td>
+                <td class="px-space-md">
+                  <div class="flex items-center gap-space-sm">
+                    <div class="h-2 w-24 rounded bg-surface-container-high" aria-hidden="true">
+                      <div
+                        class="h-2 rounded bg-primary-container"
+                        [style.width.%]="item.share * 100"
+                      ></div>
+                    </div>
+                    <span class="tabular-nums text-body-sm text-on-surface-variant">{{
+                      percentOf(item.share)
+                    }}</span>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </app-table-shell>
+    </div>
+
+    <h2 class="mb-space-md mt-space-lg font-headline text-headline-sm text-on-surface">
+      Uso por recurso
+    </h2>
+    <app-table-shell [summary]="byResource().length + ' recursos con reservas'">
+      <table class="w-full min-w-[640px] border-collapse text-left">
+        <caption class="sr-only">
+          Horas reservadas por recurso
+        </caption>
+        <thead
+          class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+        >
+          <tr class="border-b border-outline-variant">
+            <th scope="col" class="h-10 px-space-md font-medium">Recurso</th>
+            <th scope="col" class="h-10 px-space-md text-right font-medium">Reservas</th>
+            <th scope="col" class="h-10 px-space-md text-right font-medium">Horas reservadas</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-container-high text-body-md">
+          @for (item of byResource(); track item.label) {
+            <tr class="h-12 hover:bg-surface-container-low">
+              <td class="px-space-md text-on-surface">{{ item.label }}</td>
+              <td class="px-space-md text-right tabular-nums text-on-surface">{{ item.count }}</td>
+              <td class="px-space-md text-right tabular-nums text-on-surface">{{ item.hours }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-table-shell>
+  }
+}
