@@ -1,4 +1,4 @@
-# Documentación técnica — Nordic Book
+# Documentación técnica — SAR
 
 Aplicación web de gestión de reservas de recursos (salas, canchas, auditorios, equipos y vehículos) para una organización con varias sedes. Esta documentación describe la arquitectura, los módulos, las convenciones y los puntos de integración con la API.
 
@@ -8,17 +8,17 @@ Aplicación web de gestión de reservas de recursos (salas, canchas, auditorios,
 
 ## 1. Stack tecnológico
 
-| Área | Tecnología |
-|---|---|
-| Framework | Angular 21 (componentes standalone, signals, `@if`/`@for`) |
-| Lenguaje | TypeScript ~5.9 |
-| Estilos | Tailwind CSS 4 con tokens de diseño en `src/styles.css` |
-| Formularios | Reactive Forms (`ReactiveFormsModule`) y signals para estado de UI |
-| Estado asíncrono | RxJS 7.8 con `toSignal` (ver `core/utils/view-state.ts`) |
-| Pruebas | Vitest 4 mediante `ng test` (jsdom) |
-| Formato | Prettier (`.prettierrc`) y EditorConfig (`.editorconfig`) |
-| Tipografías | Geist y Hanken Grotesk (Google Fonts) |
-| Iconos | Material Symbols Outlined (Google Fonts) |
+| Área             | Tecnología                                                         |
+| ---------------- | ------------------------------------------------------------------ |
+| Framework        | Angular 21 (componentes standalone, signals, `@if`/`@for`)         |
+| Lenguaje         | TypeScript ~5.9                                                    |
+| Estilos          | Tailwind CSS 4 con tokens de diseño en `src/styles.css`            |
+| Formularios      | Reactive Forms (`ReactiveFormsModule`) y signals para estado de UI |
+| Estado asíncrono | RxJS 7.8 con `toSignal` (ver `core/utils/view-state.ts`)           |
+| Pruebas          | Vitest 4 mediante `ng test` (jsdom)                                |
+| Formato          | Prettier (`.prettierrc`) y EditorConfig (`.editorconfig`)          |
+| Tipografías      | Geist y Hanken Grotesk (Google Fonts)                              |
+| Iconos           | Material Symbols Outlined (Google Fonts)                           |
 
 Zona horaria y formato de la organización: `America/Bogota`, moneda COP, formato de fecha `DD/MM/AAAA`, hora de 24 horas.
 
@@ -77,6 +77,7 @@ Archivos de configuración en la raíz: `angular.json`, `tsconfig*.json`, `packa
 - **Ruta comodín:** cualquier ruta desconocida redirige a `''`.
 
 **Para agregar un módulo nuevo:**
+
 1. Agregar la entrada en `NAV_ITEMS`.
 2. Crear la página en `pages/<nombre>/` (componente standalone, plantilla y clase separadas).
 3. Registrarla en `IMPLEMENTED` con `import()` diferido.
@@ -88,18 +89,18 @@ Hay dos tipos de servicio:
 - **Servicios de dominio** (`*.service.ts`): exponen métodos que devuelven `Observable`. Hoy devuelven datos de demostración con `of(...)`, y el código HTTP real queda comentado con la marca `BACKEND:`.
 - **Stores** (`*.store.ts`): guardan el estado de la sesión en signals. Se pierden al recargar la página.
 
-| Clase | Tipo | Contenido |
-|---|---|---|
-| `ReservationStore` | Store | Cambios sobre reservas de demostración, reservas creadas en sesión e historial de decisiones |
-| `OperationsStore` | Store | Bloqueos, incidencias, reglas, tarifas, flujos de aprobación, permisos por rol y reglas de notificación |
-| `CatalogStore` | Store | Categorías y tipos de recursos, sedes y ubicaciones |
-| `ReservationService` | Servicio | Listado, creación, cambio de estado, reprogramación, historial |
-| `ResourceService` | Servicio | Listado de recursos |
-| `OrganizationService` | Servicio | Datos de la organización y sedes |
-| `UserService` | Servicio | Usuarios y usuario de la sesión |
-| `DashboardService` | Servicio | Resumen del Inicio |
-| `AuthService` | Servicio | Inicio de sesión, recuperación de contraseña, sesión almacenada |
-| `ThemeService` | Servicio | Modo claro u oscuro |
+| Clase                 | Tipo     | Contenido                                                                                               |
+| --------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| `ReservationStore`    | Store    | Cambios sobre reservas de demostración, reservas creadas en sesión e historial de decisiones            |
+| `OperationsStore`     | Store    | Bloqueos, incidencias, reglas, tarifas, flujos de aprobación, permisos por rol y reglas de notificación |
+| `CatalogStore`        | Store    | Categorías y tipos de recursos, sedes y ubicaciones                                                     |
+| `ReservationService`  | Servicio | Listado, creación, cambio de estado, reprogramación, historial                                          |
+| `ResourceService`     | Servicio | Listado de recursos                                                                                     |
+| `OrganizationService` | Servicio | Datos de la organización y sedes                                                                        |
+| `UserService`         | Servicio | Usuarios y usuario de la sesión                                                                         |
+| `DashboardService`    | Servicio | Resumen del Inicio                                                                                      |
+| `AuthService`         | Servicio | Inicio de sesión, recuperación de contraseña, sesión almacenada                                         |
+| `ThemeService`        | Servicio | Modo claro u oscuro                                                                                     |
 
 ### 4.3 Estados de carga y error
 
@@ -122,14 +123,14 @@ En la plantilla se resuelve con `@if` sobre `status`, y se muestra `app-state-pa
 
 Las reglas están separadas en funciones puras en `core/utils/`, con pruebas:
 
-| Archivo | Responsabilidad |
-|---|---|
-| `availability.ts` | `isValidWindow`, `evaluateWindow`: si una franja está libre o cruzada con reservas |
+| Archivo                      | Responsabilidad                                                                                                                         |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `availability.ts`            | `isValidWindow`, `evaluateWindow`: si una franja está libre o cruzada con reservas                                                      |
 | `reservation-transitions.ts` | Acciones disponibles por estado (`availableActions`), estado resultante (`targetStatus`), acciones que exigen motivo (`requiresReason`) |
-| `rules.ts` | `ruleViolations`: reglas de anticipación y duración que incumple una solicitud |
-| `blocks.ts` | `reservationsAffectedBy`: reservas que un bloqueo afecta |
-| `time.ts` | Conversión de horas e ISO 8601 con zona horaria `-05:00` |
-| `search.ts` | `matchesQuery`: búsqueda sin distinguir mayúsculas |
+| `rules.ts`                   | `ruleViolations`: reglas de anticipación y duración que incumple una solicitud                                                          |
+| `blocks.ts`                  | `reservationsAffectedBy`: reservas que un bloqueo afecta                                                                                |
+| `time.ts`                    | Conversión de horas e ISO 8601 con zona horaria `-05:00`                                                                                |
+| `search.ts`                  | `matchesQuery`: búsqueda sin distinguir mayúsculas                                                                                      |
 
 Estados de reserva: `draft`, `pending`, `adjustments_requested`, `confirmed`, `rejected`, `cancelled`, `in_progress`, `completed`, `no_show`. Las fechas se manejan como ISO 8601 con zona horaria `-05:00`.
 
@@ -146,30 +147,30 @@ Estados de reserva: `draft`, `pending`, `adjustments_requested`, `confirmed`, `r
 
 Estado: **Funcional** significa que la pantalla opera sobre los datos de la sesión. **Solo configuración** significa que guarda la configuración pero no la aplica en el resto de la app.
 
-| Grupo | Módulo | Ruta | Página | Estado |
-|---|---|---|---|---|
-| General | Inicio | `/` | `dashboard` | Funcional |
-| General | Calendario | `/calendario` | `calendar` | Funcional |
-| General | Disponibilidad | `/disponibilidad` | `availability` | Funcional |
-| Reservas | Todas las reservas | `/reservas` | `reservations` | Funcional |
-| Reservas | Solicitudes y aprobaciones | `/solicitudes` | `requests` | Funcional |
-| Reservas | Detalle y nueva reserva | `/reservas/:id`, `/reservas/nueva` | `reservation-detail`, `reservation-new` | Funcional |
-| Recursos | Recursos | `/recursos` | `resources` | Funcional |
-| Recursos | Categorías y tipos | `/categorias-tipos` | `categories-types` | Solo configuración |
-| Recursos | Sedes y ubicaciones | `/sedes` | `sites-locations` | Solo configuración |
-| Operación | Control diario | `/control-diario` | `daily-control` | Funcional |
-| Operación | Incidencias | `/incidencias` | `incidents` | Funcional |
-| Operación | Bloqueos y cierres | `/bloqueos` | `blocks` | Funcional |
-| Administración | Horarios y festivos | `/horarios` | `schedules` | Funcional (datos fijos) |
-| Administración | Reglas y políticas | `/reglas` | `rules` | Funcional |
-| Administración | Flujos de aprobación | `/flujos-aprobacion` | `approval-flows` | Solo configuración |
-| Administración | Tarifas | `/tarifas` | `rates` | Funcional |
-| Administración | Organización y parámetros | `/organizacion` | `settings` | Funcional |
-| Administración | Usuarios | `/usuarios` | `users` | Funcional |
-| Administración | Roles y permisos | `/roles` | `roles` | Solo configuración |
-| Administración | Notificaciones | `/notificaciones` | `notifications` | Solo configuración |
-| Análisis | Reportes y BI | `/reportes` | `reports` | Funcional |
-| Análisis | Auditoría | `/auditoria` | `audit` | Parcial (solo acciones sobre reservas) |
+| Grupo          | Módulo                     | Ruta                               | Página                                  | Estado                                 |
+| -------------- | -------------------------- | ---------------------------------- | --------------------------------------- | -------------------------------------- |
+| General        | Inicio                     | `/`                                | `dashboard`                             | Funcional                              |
+| General        | Calendario                 | `/calendario`                      | `calendar`                              | Funcional                              |
+| General        | Disponibilidad             | `/disponibilidad`                  | `availability`                          | Funcional                              |
+| Reservas       | Todas las reservas         | `/reservas`                        | `reservations`                          | Funcional                              |
+| Reservas       | Solicitudes y aprobaciones | `/solicitudes`                     | `requests`                              | Funcional                              |
+| Reservas       | Detalle y nueva reserva    | `/reservas/:id`, `/reservas/nueva` | `reservation-detail`, `reservation-new` | Funcional                              |
+| Recursos       | Recursos                   | `/recursos`                        | `resources`                             | Funcional                              |
+| Recursos       | Categorías y tipos         | `/categorias-tipos`                | `categories-types`                      | Solo configuración                     |
+| Recursos       | Sedes y ubicaciones        | `/sedes`                           | `sites-locations`                       | Solo configuración                     |
+| Operación      | Control diario             | `/control-diario`                  | `daily-control`                         | Funcional                              |
+| Operación      | Incidencias                | `/incidencias`                     | `incidents`                             | Funcional                              |
+| Operación      | Bloqueos y cierres         | `/bloqueos`                        | `blocks`                                | Funcional                              |
+| Administración | Horarios y festivos        | `/horarios`                        | `schedules`                             | Funcional (datos fijos)                |
+| Administración | Reglas y políticas         | `/reglas`                          | `rules`                                 | Funcional                              |
+| Administración | Flujos de aprobación       | `/flujos-aprobacion`               | `approval-flows`                        | Solo configuración                     |
+| Administración | Tarifas                    | `/tarifas`                         | `rates`                                 | Funcional                              |
+| Administración | Organización y parámetros  | `/organizacion`                    | `settings`                              | Funcional                              |
+| Administración | Usuarios                   | `/usuarios`                        | `users`                                 | Funcional                              |
+| Administración | Roles y permisos           | `/roles`                           | `roles`                                 | Solo configuración                     |
+| Administración | Notificaciones             | `/notificaciones`                  | `notifications`                         | Solo configuración                     |
+| Análisis       | Reportes y BI              | `/reportes`                        | `reports`                               | Funcional                              |
+| Análisis       | Auditoría                  | `/auditoria`                       | `audit`                                 | Parcial (solo acciones sobre reservas) |
 
 Acceso: `/login` y `/recuperar-contrasena` no requieren sesión.
 
@@ -181,23 +182,23 @@ Páginas de soporte: `module-pending` (pantalla provisional para entradas del me
 
 Todos están en `components/ui/`. Las pantallas deben usarlos antes de escribir marcado propio.
 
-| Componente | Selector o directiva | Uso |
-|---|---|---|
-| `PageHeader` | `app-page-header` | Título, descripción y acciones de cada pantalla |
-| `SectionCard` | `app-section-card` | Tarjeta con borde y fondo de superficie. Propiedad `padding`: `lg` (por defecto), `xl` o `none` |
-| `TableShell` | `app-table-shell` | Contenedor de tabla con scroll horizontal y pie de resultados |
-| `StatePanel` | `app-state-panel` | Estados de carga, vacío, error, pendiente y acceso restringido |
-| `Alert` | `app-alert` | Mensajes de éxito o error (`tone`, `icon`, `dense`) |
-| `Badge` | `app-badge` | Etiqueta de color (`tone`: `neutral`, `primary`, `success`, `warning`, `danger`) |
-| `ActiveBadge` | `app-active-badge` | Activo o inactivo; `activeLabel` e `inactiveLabel` cambian el texto |
-| `MetricCard` | `app-metric-card` | Indicador numérico sin navegación |
-| `StatCard` | `app-stat-card` | Indicador que navega a otra ruta (usado en Inicio) |
-| `ReservationStatusBadge` | `app-reservation-status-badge` | Estado de una reserva con su color |
-| `ReservationTable` | `app-reservation-table` | Tabla de reservas reutilizada |
-| `SearchInput` | `app-search-input` | Campo de búsqueda con `value` bidireccional |
-| `FilterChips` | `app-filter-chips` | Selector de vistas o filtros en forma de chips |
-| `FormField` | `app-form-field` | Etiqueta, control proyectado y mensaje de error |
-| `Button` | `[appButton]` (directiva) | Estilo de botón: `variant` (`primary`, `outline`, `ghost`) y `block` |
+| Componente               | Selector o directiva           | Uso                                                                                             |
+| ------------------------ | ------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `PageHeader`             | `app-page-header`              | Título, descripción y acciones de cada pantalla                                                 |
+| `SectionCard`            | `app-section-card`             | Tarjeta con borde y fondo de superficie. Propiedad `padding`: `lg` (por defecto), `xl` o `none` |
+| `TableShell`             | `app-table-shell`              | Contenedor de tabla con scroll horizontal y pie de resultados                                   |
+| `StatePanel`             | `app-state-panel`              | Estados de carga, vacío, error, pendiente y acceso restringido                                  |
+| `Alert`                  | `app-alert`                    | Mensajes de éxito o error (`tone`, `icon`, `dense`)                                             |
+| `Badge`                  | `app-badge`                    | Etiqueta de color (`tone`: `neutral`, `primary`, `success`, `warning`, `danger`)                |
+| `ActiveBadge`            | `app-active-badge`             | Activo o inactivo; `activeLabel` e `inactiveLabel` cambian el texto                             |
+| `MetricCard`             | `app-metric-card`              | Indicador numérico sin navegación                                                               |
+| `StatCard`               | `app-stat-card`                | Indicador que navega a otra ruta (usado en Inicio)                                              |
+| `ReservationStatusBadge` | `app-reservation-status-badge` | Estado de una reserva con su color                                                              |
+| `ReservationTable`       | `app-reservation-table`        | Tabla de reservas reutilizada                                                                   |
+| `SearchInput`            | `app-search-input`             | Campo de búsqueda con `value` bidireccional                                                     |
+| `FilterChips`            | `app-filter-chips`             | Selector de vistas o filtros en forma de chips                                                  |
+| `FormField`              | `app-form-field`               | Etiqueta, control proyectado y mensaje de error                                                 |
+| `Button`                 | `[appButton]` (directiva)      | Estilo de botón: `variant` (`primary`, `outline`, `ghost`) y `block`                            |
 
 ---
 
@@ -226,21 +227,22 @@ Las reglas de demostración y los catálogos iniciales están en `core/config/` 
 - Para conectar un servicio: reemplazar el `of(...)` por la llamada `this.http`, dejando el mismo tipo de retorno. Las pantallas no cambian.
 - Las siguientes llamadas están anotadas en el código, listas para activarse:
 
-| Método | Ruta | Servicio |
-|---|---|---|
-| `POST` | `/auth/login` | `AuthService.login` |
-| `POST` | `/auth/password-reset` | `AuthService.requestPasswordReset` |
-| `GET` | `/organization` | `OrganizationService.getOrganization` |
-| `PUT` | `/organization` | `OrganizationService.updateOrganization` |
-| `GET` | `/sites` | `OrganizationService.listSites` |
-| `GET` | `/reservations/:id` | `ReservationService` (detalle) |
-| `POST` | `/reservations` | `ReservationService.create` |
-| `PATCH` | `/reservations/:id/status` | `ReservationService.changeStatus` |
-| `PATCH` | `/reservations/:id/schedule` | `ReservationService.reschedule` |
+| Método  | Ruta                         | Servicio                                 |
+| ------- | ---------------------------- | ---------------------------------------- |
+| `POST`  | `/auth/login`                | `AuthService.login`                      |
+| `POST`  | `/auth/password-reset`       | `AuthService.requestPasswordReset`       |
+| `GET`   | `/organization`              | `OrganizationService.getOrganization`    |
+| `PUT`   | `/organization`              | `OrganizationService.updateOrganization` |
+| `GET`   | `/sites`                     | `OrganizationService.listSites`          |
+| `GET`   | `/reservations/:id`          | `ReservationService` (detalle)           |
+| `POST`  | `/reservations`              | `ReservationService.create`              |
+| `PATCH` | `/reservations/:id/status`   | `ReservationService.changeStatus`        |
+| `PATCH` | `/reservations/:id/schedule` | `ReservationService.reschedule`          |
 
 Los demás servicios (`resources`, `users`, `dashboard`, `reservations` en listado) tienen su `GET` anotado en el comentario `BACKEND:` del servicio correspondiente.
 
 **Puntos pendientes de backend:**
+
 - Persistir la configuración de categorías, sedes, flujos, permisos, reglas de notificación, tarifas, reglas y política de cancelación (hoy solo viven en la sesión).
 - Aplicar permisos del lado del servidor. Hoy la app no restringe acciones según el rol.
 - Registrar auditoría de todos los cambios de configuración, no solo de reservas.
@@ -264,12 +266,12 @@ Los demás servicios (`resources`, `users`, `dashboard`, `reservations` en lista
 
 Ejecución: `npm test`. Estado al cierre de esta documentación: 4 archivos y 25 pruebas, todas en verde.
 
-| Archivo | Cubre |
-|---|---|
-| `core/utils/availability.spec.ts` | Validación de franjas y detección de reservas que se cruzan |
-| `core/utils/reservation-transitions.spec.ts` | Acciones permitidas por estado, estado resultante y exigencia de motivo |
-| `core/utils/rules.spec.ts` | Reglas de anticipación y duración, aplicación por categoría y reglas inactivas |
-| `app.spec.ts` | Creación del componente raíz |
+| Archivo                                      | Cubre                                                                          |
+| -------------------------------------------- | ------------------------------------------------------------------------------ |
+| `core/utils/availability.spec.ts`            | Validación de franjas y detección de reservas que se cruzan                    |
+| `core/utils/reservation-transitions.spec.ts` | Acciones permitidas por estado, estado resultante y exigencia de motivo        |
+| `core/utils/rules.spec.ts`                   | Reglas de anticipación y duración, aplicación por categoría y reglas inactivas |
+| `app.spec.ts`                                | Creación del componente raíz                                                   |
 
 Las pruebas cubren la lógica pura. No hay pruebas de componentes ni de servicios todavía.
 

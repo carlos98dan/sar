@@ -29,7 +29,7 @@ export class AppShell {
   /** Toma el `data.title` de la ruta más profunda que lo defina. */
   private currentTitle(): string {
     let route: ActivatedRouteSnapshot | null = this.router.routerState.snapshot.root;
-    let title = 'Nordic Book';
+    let title = 'SAR';
     while (route) {
       title = route.data['title'] ?? title;
       route = route.firstChild;
