@@ -3,17 +3,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import { OrganizationService } from '../../../core/services/organization.service';
 import { viewStateSignal } from '../../../core/utils/view-state';
+import { NAV_GROUPS, NAV_ITEMS, NavGroup, NavItem } from './navigation';
 
-interface NavItem {
-  label: string;
-  icon: string;
-  path: string;
+interface NavSection extends NavGroup {
+  items: NavItem[];
 }
 
-/**
- * Navegación del wireframe. Los módulos de Solicitudes, Aprobaciones, Operación,
- * Reportes y Administración avanzada se agregarán en sus fases.
- */
 @Component({
   selector: 'app-sidebar',
   // El host ocupa toda la altura del shell para que el <aside> interno se estire hasta abajo.
@@ -29,14 +24,10 @@ export class Sidebar {
 
   readonly organization = viewStateSignal(this.organizationService.getOrganization());
 
-  readonly items: NavItem[] = [
-    { label: 'Dashboard', icon: 'grid_view', path: '/' },
-    { label: 'Calendario', icon: 'calendar_today', path: '/calendario' },
-    { label: 'Reservas', icon: 'confirmation_number', path: '/reservas' },
-    { label: 'Recursos', icon: 'meeting_room', path: '/recursos' },
-    { label: 'Usuarios', icon: 'group', path: '/usuarios' },
-    { label: 'Configuración', icon: 'settings', path: '/configuracion' },
-  ];
+  readonly sections: NavSection[] = NAV_GROUPS.map((group) => ({
+    ...group,
+    items: NAV_ITEMS.filter((item) => item.group === group.id),
+  }));
 
   readonly asideClasses = computed(
     () =>

@@ -1,9 +1,9 @@
 <aside [class]="asideClasses()" aria-label="Navegación principal">
-  <div class="flex h-14 items-center gap-space-sm border-b border-outline-variant px-space-md">
+  <div class="flex h-14 shrink-0 items-center gap-space-sm border-b border-outline-variant px-space-md">
     <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-primary-container font-headline text-headline-sm text-on-primary" aria-hidden="true">R</span>
     @if (!collapsed()) {
       <div class="min-w-0 flex-1">
-        <p class="font-headline text-headline-sm text-on-surface">ReserveHub</p>
+        <p class="font-headline text-headline-sm text-on-surface">Nordic Book</p>
         @if (organization(); as state) {
           @if (state.status === 'ready') {
             <p class="truncate text-label-sm text-secondary">{{ state.data.name }}</p>
@@ -21,22 +21,34 @@
     </button>
   </div>
 
-  <nav class="flex-1 space-y-space-xs overflow-y-auto p-space-sm">
-    @for (item of items; track item.path) {
-      <a
-        [routerLink]="item.path"
-        routerLinkActive="bg-primary-fixed text-on-primary-fixed-variant"
-        [routerLinkActiveOptions]="{ exact: true }"
-        [attr.aria-label]="collapsed() ? item.label : null"
-        [attr.title]="collapsed() ? item.label : null"
-        class="flex h-9 items-center gap-space-md rounded px-space-sm text-body-md text-secondary transition-colors hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-2 focus-visible:outline-primary-container"
-        (click)="drawerOpen.set(false)"
-      >
-        <span class="material-symbols-outlined shrink-0" aria-hidden="true">{{ item.icon }}</span>
-        @if (!collapsed()) {
-          <span class="truncate">{{ item.label }}</span>
+  <nav class="flex-1 overflow-y-auto p-space-sm">
+    @for (section of sections; track section.id) {
+      @if (collapsed()) {
+        <div class="mx-space-sm my-space-sm border-t border-outline-variant" aria-hidden="true"></div>
+      } @else {
+        <p class="px-space-sm pb-space-xs pt-space-md text-label-sm uppercase tracking-wider text-outline">{{ section.label }}</p>
+      }
+
+      <ul class="space-y-space-xs">
+        @for (item of section.items; track item.path) {
+          <li>
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="bg-primary-fixed text-on-primary-fixed-variant"
+              [routerLinkActiveOptions]="{ exact: true }"
+              [attr.aria-label]="collapsed() ? item.label : null"
+              [attr.title]="collapsed() ? item.label : null"
+              class="flex h-9 items-center gap-space-md rounded px-space-sm text-body-md text-secondary transition-colors hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-2 focus-visible:outline-primary-container"
+              (click)="drawerOpen.set(false)"
+            >
+              <span class="material-symbols-outlined shrink-0" aria-hidden="true">{{ item.icon }}</span>
+              @if (!collapsed()) {
+                <span class="truncate">{{ item.label }}</span>
+              }
+            </a>
+          </li>
         }
-      </a>
+      </ul>
     }
   </nav>
 </aside>

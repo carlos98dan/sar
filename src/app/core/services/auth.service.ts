@@ -20,7 +20,7 @@ interface StoredSession {
   expiresAt: number;
 }
 
-const SESSION_KEY = 'reservehub.session';
+const SESSION_KEY = 'nordicbook.session';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
