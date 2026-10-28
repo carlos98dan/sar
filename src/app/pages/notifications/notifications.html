@@ -1,0 +1,122 @@
+<app-page-header
+  title="Notificaciones"
+  description="Define por cada evento del sistema qué canales se usan y quién recibe el aviso. Los cambios se mantienen durante la sesión."
+/>
+
+<div class="grid gap-gutter xl:grid-cols-3">
+  <app-section-card class="xl:col-span-1">
+    @if (editing(); as rule) {
+      <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+        {{ eventLabels[rule.event] }}
+      </h2>
+
+      <fieldset class="mb-space-md flex flex-col gap-space-sm">
+        <legend class="text-label-md text-on-surface">Canales</legend>
+        @for (channel of channelOptions; track channel) {
+          <label class="flex items-center gap-space-sm text-body-md text-on-surface-variant">
+            <input
+              type="checkbox"
+              [checked]="channels().includes(channel)"
+              (change)="setChannel(channel, $any($event.target).checked)"
+              class="h-4 w-4 rounded border-outline-variant accent-primary-container"
+            />
+            {{ channelLabels[channel] }}
+          </label>
+        }
+      </fieldset>
+
+      <fieldset class="mb-space-md flex flex-col gap-space-sm">
+        <legend class="text-label-md text-on-surface">Destinatarios</legend>
+        @for (recipient of recipientOptions; track recipient) {
+          <label class="flex items-center gap-space-sm text-body-md text-on-surface-variant">
+            <input
+              type="checkbox"
+              [checked]="recipients().includes(recipient)"
+              (change)="setRecipient(recipient, $any($event.target).checked)"
+              class="h-4 w-4 rounded border-outline-variant accent-primary-container"
+            />
+            {{ recipientLabels[recipient] }}
+          </label>
+        }
+      </fieldset>
+
+      @if (errorMessage()) {
+        <app-alert class="mb-space-md" tone="danger" icon="error" dense>{{
+          errorMessage()
+        }}</app-alert>
+      }
+
+      <div class="flex items-center gap-space-sm">
+        <button type="button" appButton (click)="save()">Guardar cambios</button>
+        <button type="button" appButton variant="outline" (click)="cancelEdit()">Cancelar</button>
+      </div>
+    } @else {
+      <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Configuración</h2>
+      <p class="text-body-md text-on-surface-variant">
+        Selecciona un evento con el botón Configurar para elegir sus canales y destinatarios.
+      </p>
+    }
+  </app-section-card>
+
+  <app-table-shell class="xl:col-span-2" [summary]="rules().length + ' eventos'">
+    <table class="w-full min-w-[720px] border-collapse text-left">
+      <caption class="sr-only">
+        Reglas de notificación por evento
+      </caption>
+      <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
+        <tr class="border-b border-outline-variant">
+          <th scope="col" class="h-10 px-space-md font-medium">Evento</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Canales</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Destinatarios</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+          <th scope="col" class="h-10 px-space-md font-medium">
+            <span class="sr-only">Acciones</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-container-high text-body-md">
+        @for (rule of rules(); track rule.id) {
+          <tr
+            class="hover:bg-surface-container-low"
+            [class.bg-surface-container-low]="editing()?.id === rule.id"
+          >
+            <td class="px-space-md font-medium text-on-surface">{{ eventLabels[rule.event] }}</td>
+            <td class="px-space-md text-on-surface-variant">{{ channelsLabel(rule) }}</td>
+            <td class="px-space-md text-on-surface-variant">{{ recipientsLabel(rule) }}</td>
+            <td class="px-space-md">
+              <app-badge [tone]="rule.active ? 'success' : 'neutral'">
+                {{ rule.active ? 'Activa' : 'Inactiva' }}
+              </app-badge>
+            </td>
+            <td class="px-space-md">
+              <div class="flex items-center justify-end gap-space-xs">
+                <button
+                  type="button"
+                  appButton
+                  variant="ghost"
+                  class="h-8"
+                  [attr.aria-label]="'Configurar ' + eventLabels[rule.event]"
+                  (click)="startEdit(rule)"
+                >
+                  Configurar
+                </button>
+                <button
+                  type="button"
+                  appButton
+                  variant="ghost"
+                  class="h-8"
+                  [attr.aria-label]="
+                    (rule.active ? 'Desactivar ' : 'Activar ') + eventLabels[rule.event]
+                  "
+                  (click)="toggle(rule)"
+                >
+                  {{ rule.active ? 'Desactivar' : 'Activar' }}
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </app-table-shell>
+</div>

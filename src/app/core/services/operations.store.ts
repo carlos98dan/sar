@@ -1,8 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 
 import { DEFAULT_RULES, HOURLY_RATES } from '../config/booking-config';
+import { DEFAULT_NOTIFICATION_RULES } from '../config/notifications';
 import { DEFAULT_ROLE_PERMISSIONS } from '../config/permissions';
 import { ApprovalFlow } from '../models/approval-flow.model';
+import { NotificationRule } from '../models/notification.model';
 import { PermissionId } from '../models/permission.model';
 import { UserRole } from '../models/user.model';
 import { upsert } from '../utils/collections';
@@ -153,5 +155,13 @@ export class OperationsStore {
 
   resetRolePermissions(): void {
     this.rolePermissions.set(structuredClone(DEFAULT_ROLE_PERMISSIONS));
+  }
+
+  readonly notificationRules = signal<NotificationRule[]>(
+    structuredClone(DEFAULT_NOTIFICATION_RULES),
+  );
+
+  saveNotificationRule(rule: NotificationRule): void {
+    this.notificationRules.update((items) => upsert(items, rule));
   }
 }
