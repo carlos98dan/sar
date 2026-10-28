@@ -1,14 +1,29 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 
 import { API_BASE_URL } from '../api/api.config';
 import { User } from '../models/user.model';
+
+/** Usuario de la sesión actual. BACKEND: reemplazar por la respuesta del endpoint de sesión. */
+const CURRENT_USER_ID = 'usr-01';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL);
+
+  current(): Observable<User> {
+    return this.list().pipe(
+      map((users) => {
+        const user = users.find((item) => item.id === CURRENT_USER_ID);
+        if (!user) {
+          throw new Error('Usuario de la sesión no encontrado');
+        }
+        return user;
+      }),
+    );
+  }
 
   list(): Observable<User[]> {
     // BACKEND: reemplazar el JSON por la llamada real:

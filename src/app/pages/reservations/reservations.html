@@ -7,20 +7,7 @@
 
 <div class="mb-space-md flex flex-col gap-space-md">
   <div class="flex flex-col gap-space-sm md:flex-row md:items-center md:justify-between">
-    <div role="group" aria-label="Filtrar por estado" class="flex flex-wrap gap-space-sm">
-      @for (filter of statusFilters; track filter.value) {
-        <button
-          type="button"
-          [attr.aria-pressed]="status() === filter.value"
-          (click)="status.set(filter.value)"
-          [class]="status() === filter.value
-            ? 'h-8 rounded border border-primary-container bg-primary-fixed px-space-md text-label-md text-on-primary-fixed-variant'
-            : 'h-8 rounded border border-outline-variant bg-surface-container-lowest px-space-md text-label-md text-secondary hover:bg-surface-container-high'"
-        >
-          {{ filter.label }}
-        </button>
-      }
-    </div>
+    <app-filter-chips label="Filtrar por estado" [options]="statusOptions" [(value)]="status" />
 
     <div class="flex items-center gap-space-sm">
       <app-search-input
@@ -46,45 +33,10 @@
   } @else if (filtered().length === 0) {
     <app-state-panel kind="empty" message="Ajusta la búsqueda o el filtro de estado para ver otras reservas." />
   } @else {
-    <app-table-shell [summary]="filtered().length + ' de ' + state.data.length + ' reservas'">
-      <table class="w-full min-w-[760px] border-collapse text-left">
-        <caption class="sr-only">Listado de reservas</caption>
-        <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
-          <tr class="border-b border-outline-variant">
-            <th scope="col" class="h-10 px-space-md font-medium">Código</th>
-            <th scope="col" class="h-10 px-space-md font-medium">Recurso</th>
-            <th scope="col" class="h-10 px-space-md font-medium">Fecha y horario</th>
-            <th scope="col" class="h-10 px-space-md font-medium">Solicitante</th>
-            <th scope="col" class="h-10 px-space-md text-right font-medium">Asistentes</th>
-            <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-surface-container-high text-body-md">
-          @for (reservation of filtered(); track reservation.id) {
-            <tr class="h-14 hover:bg-surface-container-low">
-              <td class="px-space-md">
-                <span class="block font-medium tabular-nums text-on-surface">{{ reservation.code }}</span>
-                <span class="block max-w-[260px] truncate text-body-sm text-on-surface-variant">{{ reservation.title }}</span>
-              </td>
-              <td class="px-space-md text-on-surface">{{ reservation.resource.name }}</td>
-              <td class="px-space-md tabular-nums text-on-surface">
-                <span class="block">{{ reservation.startsAt | date: 'dd/MM/yyyy' : 'America/Bogota' }}</span>
-                <span class="block text-body-sm text-on-surface-variant">
-                  {{ reservation.startsAt | date: 'HH:mm' : 'America/Bogota' }} – {{ reservation.endsAt | date: 'HH:mm' : 'America/Bogota' }}
-                </span>
-              </td>
-              <td class="px-space-md">
-                <span class="block text-on-surface">{{ reservation.requester.name }}</span>
-                <span class="block text-body-sm text-on-surface-variant">{{ reservation.requester.department }}</span>
-              </td>
-              <td class="px-space-md text-right tabular-nums text-on-surface">{{ reservation.attendees }}</td>
-              <td class="px-space-md">
-                <app-reservation-status-badge [status]="reservation.status" />
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </app-table-shell>
+    <app-reservation-table
+      caption="Listado de reservas"
+      [reservations]="filtered()"
+      [summary]="filtered().length + ' de ' + state.data.length + ' reservas'"
+    />
   }
 }

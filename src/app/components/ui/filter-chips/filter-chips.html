@@ -1,0 +1,16 @@
+<div role="group" [attr.aria-label]="label()" class="flex flex-wrap gap-space-sm">
+  @for (option of options(); track option.value) {
+    <button
+      type="button"
+      [attr.aria-pressed]="value() === option.value"
+      (click)="value.set(option.value)"
+      [class]="
+        value() === option.value
+          ? 'h-8 rounded border border-primary-container bg-primary-fixed px-space-md text-label-md text-on-primary-fixed-variant'
+          : 'h-8 rounded border border-outline-variant bg-surface-container-lowest px-space-md text-label-md text-secondary hover:bg-surface-container-high'
+      "
+    >
+      {{ option.label }}
+    </button>
+  }
+</div>

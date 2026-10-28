@@ -1,16 +1,38 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, defer, map, of } from 'rxjs';
 
 import { API_BASE_URL } from '../api/api.config';
-import { Reservation } from '../models/reservation.model';
+import { Reservation, ReservationStatus } from '../models/reservation.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReservationService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL);
+  /** Cambios de estado hechos durante la sesión, mientras no exista el backend. */
+  private readonly statusOverrides = new Map<string, ReservationStatus>();
 
   list(): Observable<Reservation[]> {
+    return this.fetchAll().pipe(
+      map((reservations) =>
+        reservations.map((reservation) => ({
+          ...reservation,
+          status: this.statusOverrides.get(reservation.id) ?? reservation.status,
+        })),
+      ),
+    );
+  }
+
+  /** Aprobar, rechazar o pedir ajustes cambia el estado de la reserva. */
+  changeStatus(id: string, status: ReservationStatus): Observable<void> {
+    // BACKEND: return this.http.patch<void>(`${this.baseUrl}/reservations/${id}/status`, { status });
+    return defer(() => {
+      this.statusOverrides.set(id, status);
+      return of(undefined);
+    });
+  }
+
+  private fetchAll(): Observable<Reservation[]> {
     // BACKEND: reemplazar el JSON por la llamada real:
     // return this.http.get<Reservation[]>(`${this.baseUrl}/reservations`);
     return of<Reservation[]>([

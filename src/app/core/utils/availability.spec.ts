@@ -1,6 +1,6 @@
 import { Reservation, ReservationStatus } from '../models/reservation.model';
 import { Resource, ResourceAvailability } from '../models/resource.model';
-import { AvailabilityWindow, evaluateWindow, isValidWindow } from './availability';
+import { AvailabilityWindow, evaluateWindow, findConflict, isValidWindow } from './availability';
 
 const WINDOW: AvailabilityWindow = { date: '2026-10-24', from: '10:00', to: '11:00' };
 
@@ -107,5 +107,41 @@ describe('evaluateWindow', () => {
 
   it('no usa el estado "ocupado" actual del recurso para decidir una franja', () => {
     expect(evaluateWindow(resource('occupied'), [], WINDOW).status).toBe('available');
+  });
+});
+
+describe('findConflict', () => {
+  const target = reservation('2026-10-24T10:30:00-05:00', '2026-10-24T11:00:00-05:00', 'pending');
+  const other = {
+    ...reservation('2026-10-24T10:00:00-05:00', '2026-10-24T11:00:00-05:00'),
+    id: 'rsv-2',
+    code: 'RSV-2',
+  };
+
+  it('devuelve la reserva activa del mismo recurso y día que se cruza', () => {
+    expect(findConflict(target, [target, other])).toBe(other);
+  });
+
+  it('devuelve null si no hay cruces', () => {
+    const later = {
+      ...other,
+      startsAt: '2026-10-24T12:00:00-05:00',
+      endsAt: '2026-10-24T13:00:00-05:00',
+    };
+    expect(findConflict(target, [target, later])).toBeNull();
+  });
+
+  it('no compara la reserva consigo misma', () => {
+    expect(findConflict(target, [target])).toBeNull();
+  });
+
+  it('no reporta conflicto para una reserva inactiva', () => {
+    const rejected = { ...target, status: 'rejected' as const };
+    expect(findConflict(rejected, [rejected, other])).toBeNull();
+  });
+
+  it('ignora cruces con reservas canceladas', () => {
+    const cancelled = { ...other, status: 'cancelled' as const };
+    expect(findConflict(target, [target, cancelled])).toBeNull();
   });
 });

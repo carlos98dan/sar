@@ -1,0 +1,51 @@
+<app-page-header
+  title="Solicitudes"
+  description="Solicitudes enviadas a revisión en todas las sedes, con su estado actual."
+/>
+
+@if (data(); as state) {
+  @if (state.status === 'loading') {
+    <app-state-panel kind="loading" />
+  } @else if (state.status === 'error') {
+    <app-state-panel kind="error" [message]="state.message" />
+  } @else if (requests().length === 0) {
+    <app-state-panel kind="empty" message="No hay solicitudes registradas." />
+  } @else {
+    <div
+      class="mb-space-md flex flex-col gap-space-sm md:flex-row md:items-center md:justify-between"
+    >
+      <app-filter-chips
+        label="Filtrar solicitudes por estado"
+        [options]="statusOptions"
+        [(value)]="status"
+      />
+
+      <div class="flex items-center gap-space-sm">
+        <app-search-input
+          label="Buscar solicitudes"
+          placeholder="Buscar por código, recurso o solicitante"
+          class="md:w-72"
+          [(value)]="query"
+        />
+        @if (query() || status() !== 'all') {
+          <button type="button" appButton variant="ghost" class="shrink-0" (click)="clearFilters()">
+            Limpiar filtros
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (filtered().length === 0) {
+      <app-state-panel
+        kind="empty"
+        message="Ajusta la búsqueda o el filtro de estado para ver otras solicitudes."
+      />
+    } @else {
+      <app-reservation-table
+        caption="Listado de solicitudes"
+        [reservations]="filtered()"
+        [summary]="filtered().length + ' de ' + requests().length + ' solicitudes'"
+      />
+    }
+  }
+}
