@@ -105,6 +105,7 @@
           <div class="min-w-0">
             <p class="text-label-sm uppercase tracking-wider text-secondary tabular-nums">{{ reservation.code }}</p>
             <h2 class="font-headline text-headline-md text-on-surface">{{ reservation.title }}</h2>
+            <a [routerLink]="['/reservas', reservation.id]" class="text-label-md font-medium text-primary hover:underline">Ver detalle de la reserva</a>
           </div>
           <app-reservation-status-badge [status]="reservation.status" />
         </div>

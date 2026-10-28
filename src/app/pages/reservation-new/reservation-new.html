@@ -1,0 +1,371 @@
+<app-page-header
+  title="Nueva reserva"
+  description="Completa los pasos para solicitar un recurso. Revisamos la disponibilidad antes de confirmar."
+>
+  <a routerLink="/reservas" appButton variant="outline">Cancelar</a>
+</app-page-header>
+
+@if (data(); as state) {
+  @if (state.status === 'loading') {
+    <app-state-panel kind="loading" />
+  } @else if (state.status === 'error') {
+    <app-state-panel kind="error" [message]="state.message" />
+  } @else {
+    <ol class="mb-space-lg flex flex-wrap gap-space-sm" aria-label="Pasos de la reserva">
+      @for (label of stepLabels; track label; let index = $index) {
+        <li>
+          <button
+            type="button"
+            (click)="goTo(index)"
+            [disabled]="index > step()"
+            [attr.aria-current]="index === step() ? 'step' : null"
+            [class]="
+              index === step()
+                ? 'flex h-9 items-center gap-space-sm rounded border border-primary-container bg-primary-fixed px-space-md text-label-md text-on-primary-fixed-variant'
+                : 'flex h-9 items-center gap-space-sm rounded border border-outline-variant bg-surface-container-lowest px-space-md text-label-md text-secondary disabled:opacity-60'
+            "
+          >
+            <span class="tabular-nums">{{ index + 1 }}</span>
+            {{ label }}
+          </button>
+        </li>
+      }
+    </ol>
+
+    <section
+      class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+    >
+      @switch (step()) {
+        @case (0) {
+          <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+            ¿Qué tipo de recurso necesitas?
+          </h2>
+          <div class="grid gap-space-md sm:grid-cols-2 xl:grid-cols-3">
+            @for (item of categories(); track item) {
+              <button
+                type="button"
+                (click)="selectCategory(item)"
+                [attr.aria-pressed]="category() === item"
+                [class]="
+                  category() === item
+                    ? 'flex flex-col gap-space-xs rounded-lg border border-primary-container bg-primary-fixed p-space-lg text-left'
+                    : 'flex flex-col gap-space-xs rounded-lg border border-outline-variant p-space-lg text-left hover:bg-surface-container-low'
+                "
+              >
+                <span class="font-medium text-body-md text-on-surface">{{ item }}</span>
+                <span class="text-body-sm text-on-surface-variant"
+                  >{{ resourcesIn(item) }} recurso(s) para reservar</span
+                >
+              </button>
+            }
+          </div>
+        }
+
+        @case (1) {
+          <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+            Elige el recurso
+          </h2>
+          <div class="grid gap-space-md sm:grid-cols-2">
+            @for (item of categoryResources(); track item.id) {
+              <button
+                type="button"
+                (click)="selectResource(item.id)"
+                [attr.aria-pressed]="resourceId() === item.id"
+                [class]="
+                  resourceId() === item.id
+                    ? 'flex flex-col gap-space-xs rounded-lg border border-primary-container bg-primary-fixed p-space-lg text-left'
+                    : 'flex flex-col gap-space-xs rounded-lg border border-outline-variant p-space-lg text-left hover:bg-surface-container-low'
+                "
+              >
+                <span class="font-medium text-body-md text-on-surface">{{ item.name }}</span>
+                <span class="text-body-sm text-on-surface-variant"
+                  >{{ item.siteName }} · {{ item.location }}</span
+                >
+                <span class="text-body-sm tabular-nums text-on-surface-variant">
+                  Capacidad {{ item.capacity }}
+                  @if (rateOf(item.id) > 0) {
+                    · {{ formatCop(rateOf(item.id)) }} por hora
+                  }
+                </span>
+              </button>
+            }
+          </div>
+        }
+
+        @case (2) {
+          <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+            Fecha, horario y asistentes
+          </h2>
+          <div class="flex flex-wrap items-end gap-space-md">
+            <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+              Fecha
+              <input
+                type="date"
+                [value]="date()"
+                (change)="date.set($any($event.target).value)"
+                class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+              />
+            </label>
+            <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+              Desde
+              <input
+                type="time"
+                [value]="from()"
+                (change)="from.set($any($event.target).value)"
+                class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+              />
+            </label>
+            <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+              Hasta
+              <input
+                type="time"
+                [value]="to()"
+                (change)="to.set($any($event.target).value)"
+                class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+              />
+            </label>
+            <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+              Asistentes o unidades
+              <input
+                type="number"
+                min="1"
+                [value]="attendees()"
+                (change)="attendees.set(+$any($event.target).value || 1)"
+                class="h-9 w-32 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+              />
+            </label>
+          </div>
+
+          @if (!windowValid()) {
+            <app-alert class="mt-space-md" tone="danger" icon="error"
+              >La hora de fin debe ser posterior a la hora de inicio.</app-alert
+            >
+          }
+          @if (windowValid() && !attendeesValid() && resource()) {
+            <app-alert class="mt-space-md" tone="danger" icon="error">
+              El número de asistentes debe estar entre 1 y la capacidad del recurso ({{
+                resource()!.capacity
+              }}).
+            </app-alert>
+          }
+          @for (message of violations(); track message) {
+            <app-alert class="mt-space-md" tone="danger" icon="rule">{{ message }}</app-alert>
+          }
+        }
+
+        @case (3) {
+          <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Disponibilidad</h2>
+          @if (evaluation(); as result) {
+            @if (result.status === 'available') {
+              <app-alert tone="success" icon="check_circle">
+                {{ resource()?.name }} está libre el {{ date() }} de {{ from() }} a {{ to() }}.
+              </app-alert>
+            } @else if (result.status === 'booked') {
+              <app-alert tone="danger" icon="event_busy">
+                El recurso ya tiene la reserva {{ result.reservation?.code }} en ese horario. Elige
+                otra franja u otro recurso.
+              </app-alert>
+            } @else {
+              <app-alert tone="danger" icon="build">
+                Este recurso no se puede reservar en este momento por mantenimiento o porque está
+                fuera de servicio.
+              </app-alert>
+            }
+          }
+
+          @if (alternatives().length > 0) {
+            <h3
+              class="mt-space-lg mb-space-sm text-label-md uppercase tracking-wider text-secondary"
+            >
+              Alternativas libres en la misma franja
+            </h3>
+            <ul class="grid gap-space-sm sm:grid-cols-2">
+              @for (alternative of alternatives(); track alternative.resource.id) {
+                <li
+                  class="flex items-center justify-between gap-space-md rounded border border-outline-variant px-space-md py-space-sm"
+                >
+                  <div>
+                    <p class="text-body-md font-medium text-on-surface">
+                      {{ alternative.resource.name }}
+                    </p>
+                    <p class="text-body-sm text-on-surface-variant">
+                      {{ alternative.resource.location }}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    appButton
+                    variant="outline"
+                    (click)="chooseAlternative(alternative.resource.id)"
+                  >
+                    Elegir
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        }
+
+        @case (4) {
+          <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+            Datos de la reserva
+          </h2>
+          <div class="grid gap-space-md sm:grid-cols-2">
+            <label class="flex flex-col gap-space-xs text-label-md text-on-surface sm:col-span-2">
+              Título o motivo
+              <input
+                [value]="title()"
+                (input)="title.set($any($event.target).value)"
+                placeholder="Ej.: Revisión de presupuesto"
+                class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md placeholder:text-outline"
+              />
+            </label>
+            <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+              Área o departamento
+              <input
+                [value]="department()"
+                (input)="department.set($any($event.target).value)"
+                [placeholder]="user()?.department ?? ''"
+                class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md placeholder:text-outline"
+              />
+            </label>
+
+            @for (field of config().fields; track field.key) {
+              <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+                {{ field.label }}{{ field.required ? ' *' : '' }}
+                @if (field.type === 'select') {
+                  <select
+                    [value]="fieldValue(field.key)"
+                    (change)="setField(field.key, $any($event.target).value)"
+                    class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+                  >
+                    <option value="">Selecciona una opción</option>
+                    @for (option of field.options ?? []; track option) {
+                      <option [value]="option">{{ option }}</option>
+                    }
+                  </select>
+                } @else if (field.type === 'number') {
+                  <input
+                    type="number"
+                    min="0"
+                    [value]="fieldValue(field.key)"
+                    (change)="setField(field.key, +$any($event.target).value)"
+                    class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+                  />
+                } @else {
+                  <input
+                    [value]="fieldValue(field.key)"
+                    (input)="setField(field.key, $any($event.target).value)"
+                    class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+                  />
+                }
+              </label>
+            }
+          </div>
+
+          <label
+            class="mt-space-lg flex items-start gap-space-sm text-body-md text-on-surface-variant"
+          >
+            <input
+              type="checkbox"
+              [checked]="acceptPolicy()"
+              (change)="acceptPolicy.set($any($event.target).checked)"
+              class="mt-1 h-4 w-4 rounded border-outline-variant accent-primary-container"
+            />
+            Acepto las políticas de uso y cancelación del recurso.
+          </label>
+        }
+
+        @case (5) {
+          <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+            Revisa y confirma
+          </h2>
+          <dl class="grid grid-cols-1 gap-space-md text-body-md sm:grid-cols-2">
+            <div>
+              <dt class="text-label-sm uppercase tracking-wider text-secondary">Recurso</dt>
+              <dd class="text-on-surface">{{ resource()?.name }}</dd>
+            </div>
+            <div>
+              <dt class="text-label-sm uppercase tracking-wider text-secondary">Sede</dt>
+              <dd class="text-on-surface">{{ resource()?.siteName }}</dd>
+            </div>
+            <div>
+              <dt class="text-label-sm uppercase tracking-wider text-secondary">Fecha y horario</dt>
+              <dd class="tabular-nums text-on-surface">{{ date() }} · {{ from() }} – {{ to() }}</dd>
+            </div>
+            <div>
+              <dt class="text-label-sm uppercase tracking-wider text-secondary">Motivo</dt>
+              <dd class="text-on-surface">{{ title() }}</dd>
+            </div>
+            @if (cost().rate > 0) {
+              <div>
+                <dt class="text-label-sm uppercase tracking-wider text-secondary">
+                  Costo de referencia
+                </dt>
+                <dd class="tabular-nums text-on-surface">
+                  {{ formatCop(cost().total) }} ({{ cost().hours }} h)
+                </dd>
+              </div>
+            }
+          </dl>
+
+          <p class="mt-space-lg text-body-md text-on-surface-variant">
+            @if (requiresApproval()) {
+              Esta categoría requiere aprobación. La reserva quedará pendiente hasta que un
+              responsable la revise.
+            } @else {
+              La reserva quedará confirmada al enviarla.
+            }
+          </p>
+
+          @if (conflict(); as blocking) {
+            <app-alert class="mt-space-lg" tone="danger" icon="event_busy">
+              Mientras completabas la solicitud, otra reserva ({{ blocking.code }}) ocupó este
+              horario.
+              <button
+                type="button"
+                appButton
+                variant="outline"
+                class="ml-space-sm"
+                (click)="chooseAnotherSlot()"
+              >
+                Elegir otro horario
+              </button>
+            </app-alert>
+          }
+          @if (submitError()) {
+            <app-alert class="mt-space-lg" tone="danger" icon="error">{{
+              submitError()
+            }}</app-alert>
+          }
+        }
+      }
+    </section>
+
+    <div class="mt-space-lg flex items-center justify-between gap-space-md">
+      <button type="button" appButton variant="ghost" [disabled]="step() === 0" (click)="back()">
+        Anterior
+      </button>
+
+      @if (step() < stepLabels.length - 1) {
+        <button type="button" appButton [disabled]="!canAdvance()" (click)="next()">
+          Continuar
+        </button>
+      } @else {
+        <button
+          type="button"
+          appButton
+          [disabled]="submitting() || !dataValid()"
+          (click)="submit()"
+        >
+          @if (submitting()) {
+            <span class="material-symbols-outlined animate-spin text-[18px]" aria-hidden="true"
+              >progress_activity</span
+            >
+          }
+          Enviar solicitud
+        </button>
+      }
+    </div>
+  }
+}

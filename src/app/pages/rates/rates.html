@@ -1,0 +1,95 @@
+<app-page-header
+  title="Tarifas"
+  description="Tarifa por hora de cada recurso en COP. Se usa para mostrar el costo de referencia de las reservas."
+/>
+
+@if (savedMessage()) {
+  <app-alert class="mb-space-md" tone="success" icon="check_circle">{{ savedMessage() }}</app-alert>
+}
+
+@if (data(); as state) {
+  @if (state.status === 'loading') {
+    <app-state-panel kind="loading" />
+  } @else if (state.status === 'error') {
+    <app-state-panel kind="error" [message]="state.message" />
+  } @else {
+    <div class="grid gap-gutter xl:grid-cols-3">
+      <div class="xl:col-span-2">
+        <app-table-shell [summary]="resources().length + ' recursos'">
+          <table class="w-full min-w-[640px] border-collapse text-left">
+            <caption class="sr-only">
+              Tarifas por recurso
+            </caption>
+            <thead
+              class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+            >
+              <tr class="border-b border-outline-variant">
+                <th scope="col" class="h-10 px-space-md font-medium">Recurso</th>
+                <th scope="col" class="h-10 px-space-md font-medium">Categoría</th>
+                <th scope="col" class="h-10 px-space-md font-medium">Tarifa por hora (COP)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-container-high text-body-md">
+              @for (item of resources(); track item.id) {
+                <tr class="h-14 hover:bg-surface-container-low">
+                  <td class="px-space-md text-on-surface">{{ item.name }}</td>
+                  <td class="px-space-md text-on-surface-variant">{{ item.category }}</td>
+                  <td class="px-space-md">
+                    <input
+                      type="number"
+                      min="0"
+                      step="1000"
+                      [value]="rates()[item.id]"
+                      (change)="setRate(item.id, $any($event.target).value)"
+                      [attr.aria-label]="'Tarifa por hora de ' + item.name"
+                      class="h-9 w-40 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+                    />
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </app-table-shell>
+      </div>
+
+      <section
+        aria-label="Simulador de costo"
+        class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+      >
+        <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+          Simulador de costo
+        </h2>
+        <div class="flex flex-col gap-space-md">
+          <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+            Recurso
+            <select
+              [value]="simResourceId()"
+              (change)="simResourceId.set($any($event.target).value)"
+              class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+            >
+              <option value="">Selecciona un recurso</option>
+              @for (item of resources(); track item.id) {
+                <option [value]="item.id">{{ item.name }}</option>
+              }
+            </select>
+          </label>
+          <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+            Horas
+            <input
+              type="number"
+              min="0.5"
+              step="0.5"
+              [value]="simHours()"
+              (change)="simHours.set(+$any($event.target).value)"
+              class="h-9 w-32 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+            />
+          </label>
+        </div>
+        <p class="mt-space-lg font-headline text-headline-md tabular-nums text-on-surface">
+          {{ formatCop(simTotal()) }}
+        </p>
+        <p class="text-body-sm text-on-surface-variant">Costo de referencia antes de impuestos.</p>
+      </section>
+    </div>
+  }
+}

@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { ReservationStatusBadge } from '../../components/ui/reservation-status-badge/reservation-status-badge';
@@ -40,7 +41,7 @@ interface CalendarRow {
 
 @Component({
   selector: 'app-calendar',
-  imports: [DatePipe, PageHeader, ReservationStatusBadge, StatePanel, TableShell],
+  imports: [DatePipe, PageHeader, ReservationStatusBadge, RouterLink, StatePanel, TableShell],
   templateUrl: './calendar.html',
 })
 export class Calendar {

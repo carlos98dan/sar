@@ -1,0 +1,225 @@
+@if (data(); as state) {
+  @if (state.status === 'loading') {
+    <app-state-panel kind="loading" />
+  } @else if (state.status === 'error') {
+    <app-state-panel kind="error" [message]="state.message" />
+  } @else if (view(); as detail) {
+    <app-page-header
+      [title]="detail.reservation.title"
+      [description]="detail.reservation.code + ' · ' + detail.reservation.resource.name"
+    >
+      <a routerLink="/reservas" appButton variant="outline">Volver al listado</a>
+    </app-page-header>
+
+    @if (actionError()) {
+      <app-alert class="mb-space-md" tone="danger" icon="error">{{ actionError() }}</app-alert>
+    }
+
+    <div
+      class="mb-space-lg flex flex-col gap-space-md rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg md:flex-row md:items-center md:justify-between"
+    >
+      <div class="flex items-center gap-space-md">
+        <span class="text-label-md text-secondary">Estado</span>
+        <app-reservation-status-badge [status]="detail.reservation.status" />
+      </div>
+
+      @if (actions().length === 0) {
+        <p class="text-body-sm text-on-surface-variant">
+          Esta reserva está cerrada. No hay acciones disponibles.
+        </p>
+      } @else {
+        <div class="flex flex-wrap items-center gap-space-sm">
+          @for (action of actions(); track action) {
+            @if (needsReason(action) || action === 'reschedule') {
+              <button
+                type="button"
+                appButton
+                [variant]="action === 'cancel' || action === 'reject' ? 'ghost' : 'outline'"
+                (click)="open(action)"
+              >
+                {{ labels[action] }}
+              </button>
+            } @else {
+              <button type="button" appButton (click)="run(action)">{{ labels[action] }}</button>
+            }
+          }
+        </div>
+      }
+    </div>
+
+    @if (openAction(); as action) {
+      <section
+        aria-label="Confirmar acción"
+        class="mb-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+      >
+        <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+          {{ labels[action] }}
+        </h2>
+
+        @if (action === 'reschedule') {
+          <div class="flex flex-wrap items-end gap-space-md">
+            <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+              Nueva fecha
+              <input
+                type="date"
+                [value]="newDate()"
+                (change)="newDate.set($any($event.target).value)"
+                class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+              />
+            </label>
+            <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+              Desde
+              <input
+                type="time"
+                [value]="newFrom()"
+                (change)="newFrom.set($any($event.target).value)"
+                class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+              />
+            </label>
+            <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+              Hasta
+              <input
+                type="time"
+                [value]="newTo()"
+                (change)="newTo.set($any($event.target).value)"
+                class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+              />
+            </label>
+          </div>
+          @if (!validWindow()) {
+            <p class="mt-space-sm text-body-sm text-danger">
+              La hora de fin debe ser posterior a la hora de inicio.
+            </p>
+          }
+        } @else if (needsReason(action)) {
+          <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+            {{ action === 'adjust' ? 'Ajustes que debe realizar el solicitante' : 'Motivo' }}
+            <textarea
+              rows="3"
+              [value]="reason()"
+              (input)="reason.set($any($event.target).value)"
+              class="rounded border border-outline-variant bg-surface-container-lowest p-space-sm text-body-md focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+            ></textarea>
+          </label>
+        }
+
+        <div class="mt-space-md flex items-center gap-space-sm">
+          <button
+            type="button"
+            appButton
+            [disabled]="
+              (needsReason(action) && !reason().trim()) ||
+              (action === 'reschedule' && !validWindow())
+            "
+            (click)="confirm()"
+          >
+            Confirmar
+          </button>
+          <button type="button" appButton variant="ghost" (click)="close()">Cancelar</button>
+        </div>
+      </section>
+    }
+
+    <div class="grid gap-gutter xl:grid-cols-3">
+      <section
+        class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg xl:col-span-2"
+      >
+        <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+          Información general
+        </h2>
+        <dl class="grid grid-cols-1 gap-space-md text-body-md sm:grid-cols-2">
+          <div>
+            <dt class="text-label-sm uppercase tracking-wider text-secondary">Recurso</dt>
+            <dd class="text-on-surface">{{ detail.reservation.resource.name }}</dd>
+          </div>
+          <div>
+            <dt class="text-label-sm uppercase tracking-wider text-secondary">Fecha y horario</dt>
+            <dd class="tabular-nums text-on-surface">
+              {{ detail.reservation.startsAt | date: 'dd/MM/yyyy' : 'America/Bogota' }} ·
+              {{ detail.reservation.startsAt | date: 'HH:mm' : 'America/Bogota' }} –
+              {{ detail.reservation.endsAt | date: 'HH:mm' : 'America/Bogota' }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-label-sm uppercase tracking-wider text-secondary">Solicitante</dt>
+            <dd class="text-on-surface">
+              {{ detail.reservation.requester.name }} ·
+              {{ detail.reservation.requester.department }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-label-sm uppercase tracking-wider text-secondary">Asistentes</dt>
+            <dd class="tabular-nums text-on-surface">{{ detail.reservation.attendees }}</dd>
+          </div>
+          <div>
+            <dt class="text-label-sm uppercase tracking-wider text-secondary">Creada</dt>
+            <dd class="tabular-nums text-on-surface">
+              {{ detail.reservation.createdAt | date: 'dd/MM/yyyy HH:mm' : 'America/Bogota' }}
+            </dd>
+          </div>
+          @for (field of customEntries(detail.reservation.customFields ?? {}); track field[0]) {
+            <div>
+              <dt class="text-label-sm uppercase tracking-wider text-secondary">{{ field[0] }}</dt>
+              <dd class="text-on-surface">{{ field[1] }}</dd>
+            </div>
+          }
+        </dl>
+      </section>
+
+      <section
+        class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+      >
+        <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+          Costo de referencia
+        </h2>
+        @if (cost(); as value) {
+          @if (value.rate > 0) {
+            <p class="font-headline text-headline-md tabular-nums text-on-surface">
+              {{ formatCop(value.total) }}
+            </p>
+            <p class="mt-space-xs text-body-sm text-on-surface-variant">
+              {{ value.hours }} h × {{ formatCop(value.rate) }} por hora
+            </p>
+          } @else {
+            <p class="text-body-md text-on-surface-variant">
+              Este recurso no tiene tarifa configurada.
+            </p>
+          }
+        }
+      </section>
+    </div>
+
+    <section
+      class="mt-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest"
+    >
+      <div class="flex h-12 items-center border-b border-outline-variant px-space-lg">
+        <h2 class="font-headline text-headline-sm text-on-surface">Historial</h2>
+      </div>
+      @if (detail.history.length === 0) {
+        <p class="px-space-lg py-space-lg text-body-md text-on-surface-variant">
+          Todavía no hay acciones registradas para esta reserva.
+        </p>
+      } @else {
+        <ul class="divide-y divide-surface-container-high">
+          @for (item of detail.history; track item.id) {
+            <li
+              class="flex flex-col gap-space-xs px-space-lg py-space-md sm:flex-row sm:items-center sm:gap-space-md"
+            >
+              <span class="w-[150px] shrink-0 tabular-nums text-body-sm text-on-surface-variant">
+                {{ item.at | date: 'dd/MM/yyyy HH:mm' : 'America/Bogota' }}
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-body-md font-medium text-on-surface">
+                  {{ item.action }} · {{ item.actorName }}
+                </p>
+                @if (item.comment) {
+                  <p class="text-body-sm text-on-surface-variant">{{ item.comment }}</p>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+}

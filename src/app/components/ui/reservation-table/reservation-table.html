@@ -1,10 +1,6 @@
 <app-table-shell [summary]="summary()">
   <table class="w-full min-w-[760px] border-collapse text-left">
-    <caption class="sr-only">
-      {{
-        caption()
-      }}
-    </caption>
+    <caption class="sr-only">{{ caption() }}</caption>
     <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
       <tr class="border-b border-outline-variant">
         <th scope="col" class="h-10 px-space-md font-medium">Código</th>
@@ -19,18 +15,15 @@
       @for (reservation of reservations(); track reservation.id) {
         <tr class="h-14 hover:bg-surface-container-low">
           <td class="px-space-md">
-            <span class="block font-medium tabular-nums text-on-surface">{{
-              reservation.code
-            }}</span>
-            <span class="block max-w-[260px] truncate text-body-sm text-on-surface-variant">{{
-              reservation.title
-            }}</span>
+            <a
+              [routerLink]="['/reservas', reservation.id]"
+              class="block font-medium tabular-nums text-primary hover:underline"
+            >{{ reservation.code }}</a>
+            <span class="block max-w-[260px] truncate text-body-sm text-on-surface-variant">{{ reservation.title }}</span>
           </td>
           <td class="px-space-md text-on-surface">{{ reservation.resource.name }}</td>
           <td class="px-space-md tabular-nums text-on-surface">
-            <span class="block">{{
-              reservation.startsAt | date: 'dd/MM/yyyy' : 'America/Bogota'
-            }}</span>
+            <span class="block">{{ reservation.startsAt | date: 'dd/MM/yyyy' : 'America/Bogota' }}</span>
             <span class="block text-body-sm text-on-surface-variant">
               {{ reservation.startsAt | date: 'HH:mm' : 'America/Bogota' }} –
               {{ reservation.endsAt | date: 'HH:mm' : 'America/Bogota' }}
@@ -38,13 +31,9 @@
           </td>
           <td class="px-space-md">
             <span class="block text-on-surface">{{ reservation.requester.name }}</span>
-            <span class="block text-body-sm text-on-surface-variant">{{
-              reservation.requester.department
-            }}</span>
+            <span class="block text-body-sm text-on-surface-variant">{{ reservation.requester.department }}</span>
           </td>
-          <td class="px-space-md text-right tabular-nums text-on-surface">
-            {{ reservation.attendees }}
-          </td>
+          <td class="px-space-md text-right tabular-nums text-on-surface">{{ reservation.attendees }}</td>
           <td class="px-space-md">
             <app-reservation-status-badge [status]="reservation.status" />
           </td>

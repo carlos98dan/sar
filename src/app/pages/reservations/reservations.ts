@@ -1,4 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { combineLatest } from 'rxjs';
 
 import { Button } from '../../components/ui/button/button';
 import { FilterChipOption, FilterChips } from '../../components/ui/filter-chips/filter-chips';
@@ -8,18 +10,20 @@ import { SearchInput } from '../../components/ui/search-input/search-input';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
 import { Reservation } from '../../core/models/reservation.model';
 import { ReservationService } from '../../core/services/reservation.service';
+import { UserService } from '../../core/services/user.service';
 import { matchesQuery } from '../../core/utils/search';
 import { viewStateSignal } from '../../core/utils/view-state';
 
 @Component({
   selector: 'app-reservations',
-  imports: [Button, FilterChips, PageHeader, ReservationTable, SearchInput, StatePanel],
+  imports: [Button, FilterChips, PageHeader, ReservationTable, RouterLink, SearchInput, StatePanel],
   templateUrl: './reservations.html',
 })
 export class Reservations {
   private readonly reservationService = inject(ReservationService);
+  private readonly userService = inject(UserService);
 
-  readonly reservations = viewStateSignal(this.reservationService.list());
+  readonly data = viewStateSignal(combineLatest([this.reservationService.list(), this.userService.current()]));
 
   readonly statusOptions: FilterChipOption[] = [
     { value: 'all', label: 'Todas' },
@@ -32,19 +36,29 @@ export class Reservations {
 
   readonly query = signal('');
   readonly status = signal('all');
+  /** Filtro "Mis reservas": solo las reservas solicitadas por el usuario de la sesión. */
+  readonly onlyMine = signal(false);
 
-  /** Filtra por texto y estado, y ordena por hora de inicio. */
+  readonly total = computed(() => {
+    const state = this.data();
+    return state.status === 'ready' ? state.data[0].length : 0;
+  });
+
+  /** Filtra por texto, estado y solicitante, y ordena por hora de inicio. */
   readonly filtered = computed<Reservation[]>(() => {
-    const state = this.reservations();
+    const state = this.data();
     if (state.status !== 'ready') {
       return [];
     }
 
+    const [reservations, user] = state.data;
     const status = this.status();
+    const onlyMine = this.onlyMine();
 
-    return state.data
+    return reservations
       .filter(
         (reservation) =>
+          (!onlyMine || reservation.requester.id === user.id) &&
           (status === 'all' || reservation.status === status) &&
           matchesQuery(this.query(), [
             reservation.code,
@@ -59,5 +73,6 @@ export class Reservations {
   clearFilters(): void {
     this.query.set('');
     this.status.set('all');
+    this.onlyMine.set(false);
   }
 }

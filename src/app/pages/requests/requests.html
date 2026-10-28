@@ -1,51 +1,169 @@
 <app-page-header
-  title="Solicitudes"
-  description="Solicitudes enviadas a revisión en todas las sedes, con su estado actual."
-/>
+  title="Solicitudes y aprobaciones"
+  description="Decide las solicitudes pendientes, consulta la bandeja completa y revisa el historial de decisiones."
+>
+  <app-filter-chips label="Vista" [options]="viewOptions" [(value)]="view" />
+</app-page-header>
+
+@if (actionError()) {
+  <app-alert class="mb-space-md" tone="danger" icon="error">{{ actionError() }}</app-alert>
+}
 
 @if (data(); as state) {
   @if (state.status === 'loading') {
     <app-state-panel kind="loading" />
   } @else if (state.status === 'error') {
     <app-state-panel kind="error" [message]="state.message" />
-  } @else if (requests().length === 0) {
-    <app-state-panel kind="empty" message="No hay solicitudes registradas." />
   } @else {
-    <div
-      class="mb-space-md flex flex-col gap-space-sm md:flex-row md:items-center md:justify-between"
-    >
-      <app-filter-chips
-        label="Filtrar solicitudes por estado"
-        [options]="statusOptions"
-        [(value)]="status"
-      />
-
-      <div class="flex items-center gap-space-sm">
-        <app-search-input
-          label="Buscar solicitudes"
-          placeholder="Buscar por código, recurso o solicitante"
-          class="md:w-72"
-          [(value)]="query"
-        />
-        @if (query() || status() !== 'all') {
-          <button type="button" appButton variant="ghost" class="shrink-0" (click)="clearFilters()">
-            Limpiar filtros
-          </button>
+    @switch (view()) {
+      @case ('decidir') {
+        @if (toDecide().length === 0) {
+          <app-state-panel kind="empty" message="No hay solicitudes pendientes de tu decisión." />
+        } @else {
+          <app-table-shell [summary]="toDecide().length + ' solicitudes pendientes de decisión'">
+            <table class="w-full min-w-[960px] border-collapse text-left">
+              <caption class="sr-only">Solicitudes pendientes de decisión</caption>
+              <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
+                <tr class="border-b border-outline-variant">
+                  <th scope="col" class="h-10 px-space-md font-medium">Código</th>
+                  <th scope="col" class="h-10 px-space-md font-medium">Recurso</th>
+                  <th scope="col" class="h-10 px-space-md font-medium">Fecha y horario</th>
+                  <th scope="col" class="h-10 px-space-md font-medium">Solicitante</th>
+                  <th scope="col" class="h-10 px-space-md font-medium">Conflicto</th>
+                  <th scope="col" class="h-10 px-space-md font-medium">Decisión</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-surface-container-high text-body-md">
+                @for (row of toDecide(); track row.reservation.id) {
+                  <tr class="hover:bg-surface-container-low">
+                    <td class="px-space-md py-space-sm">
+                      <a
+                        [routerLink]="['/reservas', row.reservation.id]"
+                        class="block font-medium tabular-nums text-primary hover:underline"
+                      >{{ row.reservation.code }}</a>
+                      <span class="block max-w-[260px] truncate text-body-sm text-on-surface-variant">{{ row.reservation.title }}</span>
+                    </td>
+                    <td class="px-space-md text-on-surface">{{ row.reservation.resource.name }}</td>
+                    <td class="px-space-md tabular-nums text-on-surface">
+                      <span class="block">{{ row.reservation.startsAt | date: 'dd/MM/yyyy' : 'America/Bogota' }}</span>
+                      <span class="block text-body-sm text-on-surface-variant">
+                        {{ row.reservation.startsAt | date: 'HH:mm' : 'America/Bogota' }} –
+                        {{ row.reservation.endsAt | date: 'HH:mm' : 'America/Bogota' }}
+                      </span>
+                    </td>
+                    <td class="px-space-md">
+                      <span class="block text-on-surface">{{ row.reservation.requester.name }}</span>
+                      <span class="block text-body-sm text-on-surface-variant">{{ row.reservation.requester.department }}</span>
+                    </td>
+                    <td class="px-space-md">
+                      @if (row.conflict; as conflict) {
+                        <app-badge tone="danger">Choca con {{ conflict.code }}</app-badge>
+                      } @else {
+                        <app-badge tone="success">Sin conflictos</app-badge>
+                      }
+                    </td>
+                    <td class="px-space-md">
+                      <div class="flex flex-wrap items-center gap-space-sm">
+                        <button type="button" appButton (click)="approve(row)">Aprobar</button>
+                        <button type="button" appButton variant="outline" (click)="askReason(row.reservation, 'adjust')">
+                          Pedir ajustes
+                        </button>
+                        <button type="button" appButton variant="ghost" (click)="askReason(row.reservation, 'reject')">Rechazar</button>
+                      </div>
+                    </td>
+                  </tr>
+                  @if (reasonFor()?.id === row.reservation.id) {
+                    <tr class="bg-surface-container-low">
+                      <td colspan="6" class="px-space-md py-space-md">
+                        <div class="flex flex-col gap-space-sm">
+                          <label class="text-label-md text-on-surface" [attr.for]="'reason-' + row.reservation.id">
+                            {{ reasonLabel(reasonFor()?.action) }}
+                          </label>
+                          <textarea
+                            [id]="'reason-' + row.reservation.id"
+                            rows="2"
+                            [value]="reason()"
+                            (input)="reason.set($any($event.target).value)"
+                            class="rounded border border-outline-variant bg-surface-container-lowest p-space-sm text-body-md focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+                          ></textarea>
+                          <div class="flex items-center gap-space-sm">
+                            <button
+                              type="button"
+                              appButton
+                              variant="outline"
+                              [disabled]="!reason().trim()"
+                              (click)="confirmReason(row.reservation)"
+                            >
+                              {{ reasonFor()?.action === 'reject' ? 'Confirmar rechazo' : 'Enviar ajustes' }}
+                            </button>
+                            <button type="button" appButton variant="ghost" (click)="cancelReason()">Volver</button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </app-table-shell>
         }
-      </div>
-    </div>
+      }
+      @case ('bandeja') {
+        <div class="mb-space-md flex flex-col gap-space-sm md:flex-row md:items-center md:justify-between">
+          <app-filter-chips label="Filtrar solicitudes por estado" [options]="statusOptions" [(value)]="status" />
+          <app-search-input
+            label="Buscar solicitudes"
+            placeholder="Buscar por código, recurso o solicitante"
+            class="md:w-72"
+            [(value)]="query"
+          />
+        </div>
 
-    @if (filtered().length === 0) {
-      <app-state-panel
-        kind="empty"
-        message="Ajusta la búsqueda o el filtro de estado para ver otras solicitudes."
-      />
-    } @else {
-      <app-reservation-table
-        caption="Listado de solicitudes"
-        [reservations]="filtered()"
-        [summary]="filtered().length + ' de ' + requests().length + ' solicitudes'"
-      />
+        @if (bandeja().length === 0) {
+          <app-state-panel kind="empty" message="Ajusta la búsqueda o el filtro de estado para ver otras solicitudes." />
+        } @else {
+          <app-reservation-table
+            caption="Bandeja de solicitudes"
+            [reservations]="bandeja()"
+            [summary]="bandeja().length + ' de ' + requests().length + ' solicitudes'"
+          />
+        }
+      }
+      @case ('historial') {
+        @if (decisions().length === 0) {
+          <app-state-panel kind="empty" message="Todavía no hay decisiones registradas en esta sesión." />
+        } @else {
+          <app-table-shell [summary]="decisions().length + ' acciones registradas'">
+            <table class="w-full min-w-[760px] border-collapse text-left">
+              <caption class="sr-only">Historial de decisiones</caption>
+              <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
+                <tr class="border-b border-outline-variant">
+                  <th scope="col" class="h-10 px-space-md font-medium">Fecha</th>
+                  <th scope="col" class="h-10 px-space-md font-medium">Reserva</th>
+                  <th scope="col" class="h-10 px-space-md font-medium">Acción</th>
+                  <th scope="col" class="h-10 px-space-md font-medium">Responsable</th>
+                  <th scope="col" class="h-10 px-space-md font-medium">Comentario</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-surface-container-high text-body-md">
+                @for (item of decisions(); track item.id) {
+                  <tr class="h-14 hover:bg-surface-container-low">
+                    <td class="px-space-md tabular-nums text-on-surface-variant">
+                      {{ item.at | date: 'dd/MM/yyyy HH:mm' : 'America/Bogota' }}
+                    </td>
+                    <td class="px-space-md">
+                      <a [routerLink]="['/reservas', item.reservationId]" class="font-medium tabular-nums text-primary hover:underline">{{ item.reservationCode }}</a>
+                    </td>
+                    <td class="px-space-md text-on-surface">{{ item.action }}</td>
+                    <td class="px-space-md text-on-surface-variant">{{ item.actorName }}</td>
+                    <td class="px-space-md text-body-sm text-on-surface-variant">{{ item.comment || '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </app-table-shell>
+        }
+      }
     }
   }
 }

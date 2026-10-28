@@ -1,0 +1,102 @@
+<app-page-header
+  title="Control diario"
+  description="Registra la llegada, la salida y las ausencias de las reservas del día."
+>
+  <label class="flex items-center gap-space-sm text-label-md text-on-surface">
+    Fecha
+    <input
+      type="date"
+      [value]="date()"
+      (change)="date.set($any($event.target).value)"
+      class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+    />
+  </label>
+</app-page-header>
+
+<div class="mb-space-md">
+  <app-filter-chips label="Vista de control" [options]="viewOptions" [(value)]="view" />
+</div>
+
+@if (actionError()) {
+  <app-alert class="mb-space-md" tone="danger" icon="error">{{ actionError() }}</app-alert>
+}
+
+@if (data(); as state) {
+  @if (state.status === 'loading') {
+    <app-state-panel kind="loading" />
+  } @else if (state.status === 'error') {
+    <app-state-panel kind="error" [message]="state.message" />
+  } @else if (rows().length === 0) {
+    <app-state-panel
+      kind="empty"
+      [message]="
+        view() === 'ausencias'
+          ? 'No hay no asistencias registradas en esta fecha.'
+          : 'No hay reservas en curso, confirmadas o finalizadas en esta fecha.'
+      "
+    />
+  } @else {
+    <app-table-shell [summary]="rows().length + ' reservas en la fecha seleccionada'">
+      <table class="w-full min-w-[860px] border-collapse text-left">
+        <caption class="sr-only">
+          Control de reservas del día
+        </caption>
+        <thead
+          class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+        >
+          <tr class="border-b border-outline-variant">
+            <th scope="col" class="h-10 px-space-md font-medium">Horario</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Reserva</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Recurso</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Solicitante</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Registrar</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-container-high text-body-md">
+          @for (reservation of rows(); track reservation.id) {
+            <tr class="hover:bg-surface-container-low">
+              <td class="px-space-md tabular-nums text-on-surface">
+                {{ reservation.startsAt | date: 'HH:mm' : 'America/Bogota' }} –
+                {{ reservation.endsAt | date: 'HH:mm' : 'America/Bogota' }}
+              </td>
+              <td class="px-space-md py-space-sm">
+                <a
+                  [routerLink]="['/reservas', reservation.id]"
+                  class="block font-medium tabular-nums text-primary hover:underline"
+                  >{{ reservation.code }}</a
+                >
+                <span class="block max-w-[260px] truncate text-body-sm text-on-surface-variant">{{
+                  reservation.title
+                }}</span>
+              </td>
+              <td class="px-space-md text-on-surface">{{ reservation.resource.name }}</td>
+              <td class="px-space-md text-on-surface">{{ reservation.requester.name }}</td>
+              <td class="px-space-md">
+                <app-reservation-status-badge [status]="reservation.status" />
+              </td>
+              <td class="px-space-md">
+                @if (controlActions(reservation).length === 0) {
+                  <span class="text-body-sm text-on-surface-variant">Sin acciones pendientes</span>
+                } @else {
+                  <div class="flex flex-wrap items-center gap-space-sm">
+                    @for (action of controlActions(reservation); track action) {
+                      <button
+                        type="button"
+                        appButton
+                        [variant]="action === 'no_show' ? 'ghost' : 'outline'"
+                        (click)="run(reservation, action)"
+                      >
+                        {{ labels[action] }}
+                      </button>
+                    }
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-table-shell>
+  }
+}

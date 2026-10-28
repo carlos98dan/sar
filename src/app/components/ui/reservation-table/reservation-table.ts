@@ -1,14 +1,15 @@
 import { DatePipe } from '@angular/common';
 import { Component, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { Reservation } from '../../../core/models/reservation.model';
 import { ReservationStatusBadge } from '../reservation-status-badge/reservation-status-badge';
 import { TableShell } from '../table-shell/table-shell';
 
-/** Listado de reservas con código, recurso, horario, solicitante y estado. */
+/** Listado de reservas con código, recurso, horario, solicitante y estado. El código enlaza al detalle. */
 @Component({
   selector: 'app-reservation-table',
-  imports: [DatePipe, ReservationStatusBadge, TableShell],
+  imports: [DatePipe, ReservationStatusBadge, RouterLink, TableShell],
   templateUrl: './reservation-table.html',
 })
 export class ReservationTable {

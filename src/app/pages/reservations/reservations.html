@@ -1,8 +1,8 @@
 <app-page-header title="Reservas" description="Solicitudes y reservas de todas las sedes de la organización.">
-  <button type="button" appButton>
+  <a routerLink="/reservas/nueva" appButton>
     <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
     Nueva reserva
-  </button>
+  </a>
 </app-page-header>
 
 <div class="mb-space-md flex flex-col gap-space-md">
@@ -16,27 +16,37 @@
         class="md:w-72"
         [(value)]="query"
       />
-      @if (query() || status() !== 'all') {
-        <button type="button" appButton variant="ghost" class="shrink-0" (click)="clearFilters()">
-          Limpiar filtros
-        </button>
-      }
     </div>
+  </div>
+
+  <div class="flex items-center justify-between gap-space-md">
+    <label class="flex items-center gap-space-sm text-body-md text-on-surface-variant">
+      <input
+        type="checkbox"
+        [checked]="onlyMine()"
+        (change)="onlyMine.set($any($event.target).checked)"
+        class="h-4 w-4 rounded border-outline-variant accent-primary-container"
+      />
+      Solo mis reservas
+    </label>
+    @if (query() || status() !== 'all' || onlyMine()) {
+      <button type="button" appButton variant="ghost" (click)="clearFilters()">Limpiar filtros</button>
+    }
   </div>
 </div>
 
-@if (reservations(); as state) {
+@if (data(); as state) {
   @if (state.status === 'loading') {
     <app-state-panel kind="loading" />
   } @else if (state.status === 'error') {
     <app-state-panel kind="error" [message]="state.message" />
   } @else if (filtered().length === 0) {
-    <app-state-panel kind="empty" message="Ajusta la búsqueda o el filtro de estado para ver otras reservas." />
+    <app-state-panel kind="empty" message="Ajusta la búsqueda o los filtros para ver otras reservas." />
   } @else {
     <app-reservation-table
       caption="Listado de reservas"
       [reservations]="filtered()"
-      [summary]="filtered().length + ' de ' + state.data.length + ' reservas'"
+      [summary]="filtered().length + ' de ' + total() + ' reservas'"
     />
   }
 }

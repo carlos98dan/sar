@@ -1,0 +1,97 @@
+<app-page-header
+  title="Horarios y festivos"
+  description="Horario de atención por sede y días no disponibles para reservar."
+>
+  <app-filter-chips label="Vista" [options]="viewOptions" [(value)]="view" />
+</app-page-header>
+
+@if (view() === 'horario') {
+  <app-table-shell [summary]="schedules.length + ' sedes configuradas'">
+    <table class="w-full min-w-[640px] border-collapse text-left">
+      <caption class="sr-only">
+        Horario de atención por sede
+      </caption>
+      <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
+        <tr class="border-b border-outline-variant">
+          <th scope="col" class="h-10 px-space-md font-medium">Sede</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Días</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Apertura</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Cierre</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-container-high text-body-md">
+        @for (item of schedules; track item.site) {
+          <tr class="h-14 hover:bg-surface-container-low">
+            <td class="px-space-md font-medium text-on-surface">{{ item.site }}</td>
+            <td class="px-space-md text-on-surface-variant">{{ item.days }}</td>
+            <td class="px-space-md tabular-nums text-on-surface">{{ item.opens }}</td>
+            <td class="px-space-md tabular-nums text-on-surface">{{ item.closes }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </app-table-shell>
+} @else {
+  <section
+    aria-label="Agregar festivo"
+    class="mb-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+  >
+    <div class="flex flex-wrap items-end gap-space-md">
+      <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+        Fecha
+        <input
+          type="date"
+          [value]="newDate()"
+          (change)="newDate.set($any($event.target).value)"
+          class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+        />
+      </label>
+      <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+        Nombre
+        <input
+          [value]="newName()"
+          (input)="newName.set($any($event.target).value)"
+          placeholder="Ej.: Día de cierre institucional"
+          class="h-9 w-72 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md placeholder:text-outline"
+        />
+      </label>
+      <button type="button" appButton [disabled]="!canAdd()" (click)="addHoliday()">
+        Agregar festivo
+      </button>
+    </div>
+  </section>
+
+  @if (holidays().length === 0) {
+    <app-state-panel kind="empty" message="No hay festivos ni excepciones registradas." />
+  } @else {
+    <app-table-shell [summary]="holidays().length + ' festivos y excepciones'">
+      <table class="w-full min-w-[560px] border-collapse text-left">
+        <caption class="sr-only">
+          Festivos y excepciones
+        </caption>
+        <thead
+          class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+        >
+          <tr class="border-b border-outline-variant">
+            <th scope="col" class="h-10 px-space-md font-medium">Fecha</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Nombre</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Acción</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-container-high text-body-md">
+          @for (item of holidays(); track item.date) {
+            <tr class="h-14 hover:bg-surface-container-low">
+              <td class="px-space-md tabular-nums text-on-surface">{{ formatDate(item.date) }}</td>
+              <td class="px-space-md text-on-surface">{{ item.name }}</td>
+              <td class="px-space-md">
+                <button type="button" appButton variant="ghost" (click)="removeHoliday(item.date)">
+                  Quitar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-table-shell>
+  }
+}

@@ -1,0 +1,213 @@
+<app-page-header
+  title="Reglas y políticas"
+  description="Define cuándo y cuánto se puede reservar, y las condiciones de cancelación."
+>
+  <app-filter-chips label="Vista" [options]="viewOptions" [(value)]="view" />
+</app-page-header>
+
+@if (view() === 'reglas') {
+  <div class="grid gap-gutter xl:grid-cols-3">
+    <div class="xl:col-span-2">
+      <app-table-shell [summary]="rules().length + ' reglas configuradas'">
+        <table class="w-full min-w-[720px] border-collapse text-left">
+          <caption class="sr-only">
+            Reglas de reserva
+          </caption>
+          <thead
+            class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+          >
+            <tr class="border-b border-outline-variant">
+              <th scope="col" class="h-10 px-space-md font-medium">Regla</th>
+              <th scope="col" class="h-10 px-space-md font-medium">Condición</th>
+              <th scope="col" class="h-10 px-space-md font-medium">Alcance</th>
+              <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container-high text-body-md">
+            @for (rule of rules(); track rule.id) {
+              <tr class="hover:bg-surface-container-low">
+                <td class="px-space-md font-medium text-on-surface">{{ rule.name }}</td>
+                <td class="px-space-md tabular-nums text-on-surface-variant">
+                  {{ kindLabel(rule) }}: {{ rule.value }}
+                </td>
+                <td class="px-space-md text-on-surface-variant">
+                  {{ rule.category ?? 'Todas las categorías' }}
+                </td>
+                <td class="px-space-md">
+                  <div class="flex items-center gap-space-sm">
+                    <app-badge [tone]="rule.active ? 'success' : 'neutral'">{{
+                      rule.active ? 'Activa' : 'Inactiva'
+                    }}</app-badge>
+                    <button type="button" appButton variant="ghost" (click)="toggle(rule)">
+                      {{ rule.active ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </app-table-shell>
+
+      <section
+        aria-label="Nueva regla"
+        class="mt-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+      >
+        <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Nueva regla</h2>
+        <div class="flex flex-wrap items-end gap-space-md">
+          <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+            Nombre
+            <input
+              [value]="newName()"
+              (input)="newName.set($any($event.target).value)"
+              class="h-9 w-64 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+            />
+          </label>
+          <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+            Tipo
+            <select
+              [value]="newKind()"
+              (change)="newKind.set($any($event.target).value)"
+              class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+            >
+              @for (kind of kindLabels | keyvalue; track kind.key) {
+                <option [value]="kind.key">{{ kind.value }}</option>
+              }
+            </select>
+          </label>
+          <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+            Valor
+            <input
+              type="number"
+              min="1"
+              [value]="newValue()"
+              (change)="newValue.set(+$any($event.target).value)"
+              class="h-9 w-28 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+            />
+          </label>
+          <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+            Categoría
+            <select
+              [value]="newCategory()"
+              (change)="newCategory.set($any($event.target).value)"
+              class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+            >
+              <option value="">Todas</option>
+              @for (item of categories; track item) {
+                <option [value]="item">{{ item }}</option>
+              }
+            </select>
+          </label>
+          <button type="button" appButton [disabled]="!canAddRule()" (click)="addRule()">
+            Crear regla
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <section
+      aria-label="Simulador de reglas"
+      class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+    >
+      <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Simulador</h2>
+      <p class="mb-space-md text-body-sm text-on-surface-variant">
+        Comprueba si una solicitud cumpliría las reglas activas.
+      </p>
+      <div class="flex flex-col gap-space-md">
+        <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+          Categoría
+          <select
+            [value]="simCategory()"
+            (change)="simCategory.set($any($event.target).value)"
+            class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+          >
+            @for (item of categories; track item) {
+              <option [value]="item">{{ item }}</option>
+            }
+          </select>
+        </label>
+        <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+          Anticipación (horas)
+          <input
+            type="number"
+            min="0"
+            [value]="simAnticipation()"
+            (change)="simAnticipation.set(+$any($event.target).value)"
+            class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+          />
+        </label>
+        <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+          Duración (minutos)
+          <input
+            type="number"
+            min="0"
+            [value]="simDuration()"
+            (change)="simDuration.set(+$any($event.target).value)"
+            class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+          />
+        </label>
+      </div>
+
+      <div class="mt-space-lg">
+        @if (simResult().length === 0) {
+          <app-alert tone="success" icon="check_circle"
+            >La solicitud cumple las reglas activas.</app-alert
+          >
+        } @else {
+          @for (message of simResult(); track message) {
+            <app-alert class="mb-space-sm" tone="danger" icon="rule">{{ message }}</app-alert>
+          }
+        }
+      </div>
+    </section>
+  </div>
+} @else {
+  <section
+    aria-label="Política de cancelación"
+    class="max-w-[640px] rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+  >
+    <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+      Política de cancelación
+    </h2>
+    <div class="flex flex-col gap-space-md">
+      <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+        Horas de anticipación para cancelar sin costo
+        <input
+          type="number"
+          min="0"
+          [value]="freeCancelHours()"
+          (change)="freeCancelHours.set(+$any($event.target).value)"
+          class="h-9 w-32 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+        />
+      </label>
+      <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+        Penalización por cancelación tardía (%)
+        <input
+          type="number"
+          min="0"
+          max="100"
+          [value]="penaltyPercent()"
+          (change)="penaltyPercent.set(+$any($event.target).value)"
+          class="h-9 w-32 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+        />
+      </label>
+      <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+        Texto que verá el usuario
+        <textarea
+          rows="3"
+          [value]="policyText()"
+          (input)="policyText.set($any($event.target).value)"
+          class="rounded border border-outline-variant bg-surface-container-lowest p-space-sm text-body-md"
+        ></textarea>
+      </label>
+      <div class="flex items-center gap-space-sm">
+        <button type="button" appButton (click)="savePolicy()">Guardar política</button>
+        @if (policySaved()) {
+          <span role="status" class="text-body-sm text-success"
+            >Política guardada en esta sesión.</span
+          >
+        }
+      </div>
+    </div>
+  </section>
+}

@@ -1,0 +1,207 @@
+<app-page-header
+  title="Bloqueos y cierres"
+  description="Periodos en los que un recurso o una sede no aceptan reservas. Revisa el impacto antes de guardar."
+/>
+
+<div class="grid gap-gutter xl:grid-cols-3">
+  <section
+    aria-label="Nuevo bloqueo"
+    class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg xl:col-span-1"
+  >
+    <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Nuevo bloqueo</h2>
+    <div class="flex flex-col gap-space-md">
+      <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+        Tipo
+        <select
+          [value]="type()"
+          (change)="type.set($any($event.target).value)"
+          class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+        >
+          @for (item of types; track item) {
+            <option [value]="item">{{ typeLabels[item] }}</option>
+          }
+        </select>
+      </label>
+      <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+        Recurso
+        <select
+          [value]="resourceId()"
+          (change)="resourceId.set($any($event.target).value)"
+          class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+        >
+          <option value="">Todas las sedes</option>
+          @for (item of resources(); track item.id) {
+            <option [value]="item.id">{{ item.name }}</option>
+          }
+        </select>
+      </label>
+      <div class="grid grid-cols-2 gap-space-sm">
+        <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+          Inicio
+          <input
+            type="date"
+            [value]="date()"
+            (change)="date.set($any($event.target).value)"
+            class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+          />
+        </label>
+        <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+          Hora
+          <input
+            type="time"
+            [value]="from()"
+            (change)="from.set($any($event.target).value)"
+            class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+          />
+        </label>
+        <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+          Fin
+          <input
+            type="date"
+            [value]="endDate()"
+            (change)="endDate.set($any($event.target).value)"
+            class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+          />
+        </label>
+        <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+          Hora
+          <input
+            type="time"
+            [value]="to()"
+            (change)="to.set($any($event.target).value)"
+            class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md tabular-nums"
+          />
+        </label>
+      </div>
+      @if (!windowValid()) {
+        <p class="text-body-sm text-danger">El fin debe ser posterior al inicio.</p>
+      }
+      <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+        Motivo
+        <textarea
+          rows="2"
+          [value]="reason()"
+          (input)="reason.set($any($event.target).value)"
+          class="rounded border border-outline-variant bg-surface-container-lowest p-space-sm text-body-md"
+        ></textarea>
+      </label>
+    </div>
+  </section>
+
+  <section
+    aria-label="Impacto del bloqueo"
+    class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg xl:col-span-2"
+  >
+    <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Impacto</h2>
+
+    @if (!windowValid()) {
+      <p class="text-body-md text-on-surface-variant">
+        Define un periodo válido para revisar las reservas afectadas.
+      </p>
+    } @else if (affected().length === 0) {
+      <app-alert tone="success" icon="check_circle"
+        >Este bloqueo no afecta reservas activas ni pendientes.</app-alert
+      >
+    } @else {
+      <app-alert tone="danger" icon="warning">
+        Este bloqueo afecta a {{ affected().length }} reserva(s). Elige qué hacer con ellas antes de
+        guardar.
+      </app-alert>
+      <ul
+        class="mt-space-md divide-y divide-surface-container-high rounded border border-outline-variant"
+      >
+        @for (reservation of affected(); track reservation.id) {
+          <li
+            class="flex flex-col gap-space-xs px-space-md py-space-sm sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span class="text-body-md text-on-surface">
+              <span class="font-medium tabular-nums">{{ reservation.code }}</span> ·
+              {{ reservation.resource.name }} ·
+              {{ reservation.startsAt | date: 'dd/MM HH:mm' : 'America/Bogota' }}
+            </span>
+            <span class="text-body-sm text-on-surface-variant">{{
+              reservation.requester.name
+            }}</span>
+          </li>
+        }
+      </ul>
+      <fieldset class="mt-space-md flex flex-col gap-space-sm">
+        <legend class="text-label-md text-on-surface">Reservas afectadas</legend>
+        <label class="flex items-center gap-space-sm text-body-md text-on-surface-variant">
+          <input
+            type="radio"
+            name="affected"
+            value="cancel"
+            [checked]="affectedPolicy() === 'cancel'"
+            (change)="affectedPolicy.set('cancel')"
+            class="accent-primary-container"
+          />
+          Cancelarlas (se registra el motivo en el historial de cada una)
+        </label>
+        <label class="flex items-center gap-space-sm text-body-md text-on-surface-variant">
+          <input
+            type="radio"
+            name="affected"
+            value="notify"
+            [checked]="affectedPolicy() === 'notify'"
+            (change)="affectedPolicy.set('notify')"
+            class="accent-primary-container"
+          />
+          Mantenerlas y marcarlas para que el coordinador contacte a los solicitantes
+        </label>
+      </fieldset>
+    }
+
+    <div class="mt-space-lg flex items-center gap-space-sm">
+      <button type="button" appButton [disabled]="!canSave()" (click)="save()">
+        Guardar bloqueo
+      </button>
+      @if (reason().trim().length > 0 && reason().trim().length < 5) {
+        <span class="text-body-sm text-on-surface-variant"
+          >El motivo debe tener al menos 5 caracteres.</span
+        >
+      }
+    </div>
+  </section>
+</div>
+
+<h2 class="mb-space-md mt-space-lg font-headline text-headline-sm text-on-surface">
+  Bloqueos registrados
+</h2>
+
+@if (blocks().length === 0) {
+  <app-state-panel kind="empty" message="No hay bloqueos registrados." />
+} @else {
+  <app-table-shell [summary]="blocks().length + ' bloqueos registrados'">
+    <table class="w-full min-w-[820px] border-collapse text-left">
+      <caption class="sr-only">
+        Bloqueos registrados
+      </caption>
+      <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
+        <tr class="border-b border-outline-variant">
+          <th scope="col" class="h-10 px-space-md font-medium">Tipo</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Recurso</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Periodo</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Motivo</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Responsable</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-container-high text-body-md">
+        @for (block of blocks(); track block.id) {
+          <tr class="hover:bg-surface-container-low">
+            <td class="px-space-md">
+              <app-badge tone="neutral">{{ typeLabels[block.type] }}</app-badge>
+            </td>
+            <td class="px-space-md text-on-surface">{{ block.resourceName }}</td>
+            <td class="px-space-md tabular-nums text-on-surface">
+              {{ block.startsAt | date: 'dd/MM HH:mm' : 'America/Bogota' }} –
+              {{ block.endsAt | date: 'dd/MM HH:mm' : 'America/Bogota' }}
+            </td>
+            <td class="px-space-md text-body-sm text-on-surface-variant">{{ block.reason }}</td>
+            <td class="px-space-md text-on-surface-variant">{{ block.responsible }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </app-table-shell>
+}

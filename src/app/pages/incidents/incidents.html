@@ -1,0 +1,120 @@
+<app-page-header
+  title="Incidencias"
+  description="Reportes asociados a recursos o reservas, con seguimiento hasta su resolución."
+>
+  <button type="button" appButton (click)="toggleForm()">
+    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+    Reportar incidencia
+  </button>
+</app-page-header>
+
+@if (formOpen()) {
+  <section
+    aria-label="Nueva incidencia"
+    class="mb-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
+  >
+    <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Nueva incidencia</h2>
+    <div class="grid gap-space-md sm:grid-cols-2">
+      <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+        Recurso
+        <select
+          [value]="resourceId()"
+          (change)="resourceId.set($any($event.target).value)"
+          class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+        >
+          <option value="">Selecciona un recurso</option>
+          @for (item of resources(); track item.id) {
+            <option [value]="item.id">{{ item.name }}</option>
+          }
+        </select>
+      </label>
+      <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
+        Prioridad
+        <select
+          [value]="priority()"
+          (change)="priority.set($any($event.target).value)"
+          class="h-9 rounded border border-outline-variant bg-surface-container-lowest px-space-sm text-body-md"
+        >
+          <option value="baja">Baja</option>
+          <option value="media">Media</option>
+          <option value="alta">Alta</option>
+        </select>
+      </label>
+      <label class="flex flex-col gap-space-xs text-label-md text-on-surface sm:col-span-2">
+        Descripción
+        <textarea
+          rows="3"
+          [value]="description()"
+          (input)="description.set($any($event.target).value)"
+          class="rounded border border-outline-variant bg-surface-container-lowest p-space-sm text-body-md"
+        ></textarea>
+        <span class="text-body-sm text-on-surface-variant"
+          >Describe el problema con al menos 10 caracteres.</span
+        >
+      </label>
+    </div>
+    <div class="mt-space-md flex items-center gap-space-sm">
+      <button type="button" appButton [disabled]="!canSave()" (click)="save()">
+        Guardar incidencia
+      </button>
+      <button type="button" appButton variant="ghost" (click)="toggleForm()">Cancelar</button>
+    </div>
+  </section>
+}
+
+@if (incidents().length === 0) {
+  <app-state-panel kind="empty" message="No hay incidencias registradas." />
+} @else {
+  <app-table-shell [summary]="openCount() + ' incidencias abiertas de ' + incidents().length">
+    <table class="w-full min-w-[860px] border-collapse text-left">
+      <caption class="sr-only">
+        Listado de incidencias
+      </caption>
+      <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
+        <tr class="border-b border-outline-variant">
+          <th scope="col" class="h-10 px-space-md font-medium">Código</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Recurso</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Descripción</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Prioridad</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Responsable</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+          <th scope="col" class="h-10 px-space-md font-medium">Acción</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-container-high text-body-md">
+        @for (item of incidents(); track item.id) {
+          <tr class="hover:bg-surface-container-low">
+            <td class="px-space-md py-space-sm">
+              <span class="block font-medium tabular-nums text-on-surface">{{ item.code }}</span>
+              <span class="block text-body-sm text-on-surface-variant">{{
+                item.reportedAt | date: 'dd/MM/yyyy HH:mm' : 'America/Bogota'
+              }}</span>
+            </td>
+            <td class="px-space-md text-on-surface">{{ item.resourceName }}</td>
+            <td class="max-w-[320px] px-space-md text-body-sm text-on-surface-variant">
+              {{ item.description }}
+            </td>
+            <td class="px-space-md">
+              <app-badge [tone]="priorityMeta[item.priority].tone">{{
+                priorityMeta[item.priority].label
+              }}</app-badge>
+            </td>
+            <td class="px-space-md text-on-surface-variant">{{ item.responsible }}</td>
+            <td class="px-space-md">
+              <app-badge [tone]="statusMeta[item.status].tone">{{
+                statusMeta[item.status].label
+              }}</app-badge>
+            </td>
+            <td class="px-space-md">
+              @if (item.status !== 'resuelta') {
+                <button type="button" appButton variant="outline" (click)="advance(item)">
+                  {{ nextLabel(item.status) }}
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </app-table-shell>
+}
