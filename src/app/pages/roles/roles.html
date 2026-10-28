@@ -1,0 +1,71 @@
+<app-page-header
+  title="Roles y permisos"
+  description="Define qué puede hacer cada rol en el sistema. Los cambios se mantienen durante la sesión."
+>
+  <button type="button" appButton variant="outline" (click)="reset()">Restablecer valores</button>
+</app-page-header>
+
+<app-alert class="mb-space-md" tone="success" icon="info">
+  El superadministrador conserva todos los permisos y no se puede modificar.
+</app-alert>
+
+@let state = users();
+@if (state.status === 'loading') {
+  <app-state-panel kind="loading" />
+} @else if (state.status === 'error') {
+  <app-state-panel kind="error" [message]="state.message" />
+} @else {
+  <app-table-shell summary="Matriz de permisos por rol">
+    <table class="w-full min-w-[960px] border-collapse text-left">
+      <caption class="sr-only">
+        Permisos asignados a cada rol
+      </caption>
+      <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
+        <tr class="border-b border-outline-variant">
+          <th scope="col" class="h-10 px-space-md font-medium">Permiso</th>
+          @for (role of roles; track role) {
+            <th scope="col" class="h-10 px-space-md text-center font-medium">
+              <span
+                class="block normal-case tracking-normal text-body-sm font-medium text-on-surface"
+                >{{ roleLabels[role] }}</span
+              >
+              <span class="block normal-case tracking-normal text-body-sm text-on-surface-variant"
+                >{{ userCounts()[role] ?? 0 }} usuarios</span
+              >
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-container-high text-body-md">
+        @for (module of modules; track module) {
+          <tr class="bg-surface-container-lowest">
+            <th
+              scope="rowgroup"
+              colspan="7"
+              class="px-space-md py-space-xs text-label-md font-medium text-on-surface"
+            >
+              {{ module }}
+            </th>
+          </tr>
+          @for (permission of permissionsOf(module); track permission.id) {
+            <tr class="h-12 hover:bg-surface-container-low">
+              <td class="px-space-md text-on-surface">{{ permission.label }}</td>
+              @for (role of roles; track role) {
+                <td class="px-space-md text-center">
+                  <input
+                    type="checkbox"
+                    [checked]="has(role, permission.id)"
+                    [disabled]="isLocked(role)"
+                    (change)="toggle(role, permission.id, $event)"
+                    [attr.aria-label]="roleLabels[role] + ': ' + permission.label"
+                    class="h-4 w-4 rounded border-outline-variant accent-primary-container disabled:opacity-60"
+                  />
+                </td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </app-table-shell>
+}

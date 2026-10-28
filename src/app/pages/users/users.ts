@@ -7,19 +7,11 @@ import { PageHeader } from '../../components/ui/page-header/page-header';
 import { SearchInput } from '../../components/ui/search-input/search-input';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
 import { TableShell } from '../../components/ui/table-shell/table-shell';
-import { User, UserRole } from '../../core/models/user.model';
+import { ROLE_LABELS } from '../../core/config/roles';
+import { User } from '../../core/models/user.model';
 import { UserService } from '../../core/services/user.service';
 import { matchesQuery } from '../../core/utils/search';
 import { viewStateSignal } from '../../core/utils/view-state';
-
-const ROLE_LABELS: Record<UserRole, string> = {
-  superadmin: 'Superadministrador',
-  organization_admin: 'Administrador de organización',
-  site_coordinator: 'Coordinador de sede',
-  approver: 'Aprobador',
-  operator: 'Operador',
-  user: 'Usuario',
-};
 
 @Component({
   selector: 'app-users',

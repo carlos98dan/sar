@@ -1,7 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 
 import { DEFAULT_RULES, HOURLY_RATES } from '../config/booking-config';
+import { DEFAULT_ROLE_PERMISSIONS } from '../config/permissions';
 import { ApprovalFlow } from '../models/approval-flow.model';
+import { PermissionId } from '../models/permission.model';
+import { UserRole } from '../models/user.model';
 import { upsert } from '../utils/collections';
 import { BookingRule } from '../utils/rules';
 
@@ -135,5 +138,20 @@ export class OperationsStore {
 
   saveApprovalFlow(flow: ApprovalFlow): void {
     this.approvalFlows.update((items) => upsert(items, flow));
+  }
+
+  readonly rolePermissions = signal<Record<UserRole, PermissionId[]>>(
+    structuredClone(DEFAULT_ROLE_PERMISSIONS),
+  );
+
+  setRolePermission(role: UserRole, permission: PermissionId, granted: boolean): void {
+    this.rolePermissions.update((items) => {
+      const current = items[role].filter((id) => id !== permission);
+      return { ...items, [role]: granted ? [...current, permission] : current };
+    });
+  }
+
+  resetRolePermissions(): void {
+    this.rolePermissions.set(structuredClone(DEFAULT_ROLE_PERMISSIONS));
   }
 }
