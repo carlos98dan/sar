@@ -78,6 +78,45 @@
   --spacing-space-xl: 2rem;
 }
 
+/*
+ * Modo oscuro: redefine los tokens de color cuando <html data-theme="dark">.
+ * Los colores de texto (primary, secondary y estados) se aclaran para conservar el contraste sobre fondos oscuros.
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-surface: #0e1424;
+  --color-surface-dim: #080c18;
+  --color-surface-container-lowest: #161d2f;
+  --color-surface-container-low: #1b2338;
+  --color-surface-container: #20283e;
+  --color-surface-container-high: #29324b;
+  --color-surface-container-highest: #334060;
+
+  --color-on-surface: #e3e8f5;
+  --color-on-surface-variant: #c2c9dc;
+  --color-outline: #8c93a8;
+  --color-outline-variant: #3d4560;
+
+  --color-primary: #7b96ff;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #1d4ed8;
+  --color-on-primary-container: #cad3ff;
+  --color-primary-fixed: #1e2d63;
+  --color-on-primary-fixed: #dbe3ff;
+  --color-on-primary-fixed-variant: #b9c8ff;
+
+  --color-secondary: #a9b4cc;
+  --color-secondary-container: #2a3652;
+
+  --color-success: #34d399;
+  --color-success-container: #0c2e24;
+  --color-warning: #fbbf24;
+  --color-warning-container: #2e2306;
+  --color-danger: #f87171;
+  --color-danger-container: #3a1517;
+}
+
 @layer base {
   body {
     @apply bg-surface font-body text-on-surface antialiased;
