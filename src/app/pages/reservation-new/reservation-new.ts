@@ -6,6 +6,7 @@ import { Alert } from '../../components/ui/alert/alert';
 import { Button } from '../../components/ui/button/button';
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
+import { SectionCard } from '../../components/ui/section-card/section-card';
 import { configFor, HOURLY_RATES } from '../../core/config/booking-config';
 import { Reservation, ReservationStatus } from '../../core/models/reservation.model';
 import { Resource } from '../../core/models/resource.model';
@@ -44,7 +45,7 @@ const COP = new Intl.NumberFormat('es-CO', {
 /** Asistente de reserva en seis pasos. Los campos adicionales dependen de la categoría del recurso. */
 @Component({
   selector: 'app-reservation-new',
-  imports: [Alert, Button, PageHeader, RouterLink, StatePanel],
+  imports: [Alert, Button, PageHeader, RouterLink, StatePanel, SectionCard],
   templateUrl: './reservation-new.html',
 })
 export class ReservationNew {

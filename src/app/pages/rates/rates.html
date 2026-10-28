@@ -52,10 +52,7 @@
         </app-table-shell>
       </div>
 
-      <section
-        aria-label="Simulador de costo"
-        class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
-      >
+      <app-section-card aria-label="Simulador de costo" role="region">
         <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
           Simulador de costo
         </h2>
@@ -89,7 +86,7 @@
           {{ formatCop(simTotal()) }}
         </p>
         <p class="text-body-sm text-on-surface-variant">Costo de referencia antes de impuestos.</p>
-      </section>
+      </app-section-card>
     </div>
   }
 }

@@ -5,6 +5,7 @@ import { FilterChipOption, FilterChips } from '../../components/ui/filter-chips/
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
 import { TableShell } from '../../components/ui/table-shell/table-shell';
+import { SectionCard } from '../../components/ui/section-card/section-card';
 import { HOLIDAYS, Holiday, SITE_SCHEDULES } from '../../core/config/booking-config';
 
 const VIEW_OPTIONS: FilterChipOption[] = [
@@ -15,7 +16,7 @@ const VIEW_OPTIONS: FilterChipOption[] = [
 /** Horario de atención por sede y festivos que bloquean la disponibilidad. */
 @Component({
   selector: 'app-schedules',
-  imports: [Button, FilterChips, PageHeader, StatePanel, TableShell],
+  imports: [Button, FilterChips, PageHeader, StatePanel, TableShell, SectionCard],
   templateUrl: './schedules.html',
 })
 export class Schedules {

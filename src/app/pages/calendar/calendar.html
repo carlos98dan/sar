@@ -100,7 +100,7 @@
     </app-table-shell>
 
     @if (selected(); as reservation) {
-      <section aria-label="Detalle de la reserva seleccionada" class="mt-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg">
+      <app-section-card aria-label="Detalle de la reserva seleccionada" class="mt-space-lg" role="region">
         <div class="mb-space-md flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">
           <div class="min-w-0">
             <p class="text-label-sm uppercase tracking-wider text-secondary tabular-nums">{{ reservation.code }}</p>
@@ -129,7 +129,7 @@
             <dd class="tabular-nums text-on-surface">{{ reservation.attendees }}</dd>
           </div>
         </dl>
-      </section>
+      </app-section-card>
     }
   }
 }

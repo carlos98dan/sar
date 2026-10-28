@@ -4,10 +4,7 @@
 />
 
 <div class="grid gap-gutter xl:grid-cols-3">
-  <section
-    aria-label="Nuevo bloqueo"
-    class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg xl:col-span-1"
-  >
+  <app-section-card aria-label="Nuevo bloqueo" class="xl:col-span-1" role="region">
     <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Nuevo bloqueo</h2>
     <div class="flex flex-col gap-space-md">
       <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
@@ -86,12 +83,9 @@
         ></textarea>
       </label>
     </div>
-  </section>
+  </app-section-card>
 
-  <section
-    aria-label="Impacto del bloqueo"
-    class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg xl:col-span-2"
-  >
+  <app-section-card aria-label="Impacto del bloqueo" class="xl:col-span-2" role="region">
     <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Impacto</h2>
 
     @if (!windowValid()) {
@@ -162,7 +156,7 @@
         >
       }
     </div>
-  </section>
+  </app-section-card>
 </div>
 
 <h2 class="mb-space-md mt-space-lg font-headline text-headline-sm text-on-surface">

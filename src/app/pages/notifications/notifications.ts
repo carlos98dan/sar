@@ -1,11 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 
 import { Alert } from '../../components/ui/alert/alert';
-import { Badge } from '../../components/ui/badge/badge';
 import { Button } from '../../components/ui/button/button';
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { SectionCard } from '../../components/ui/section-card/section-card';
 import { TableShell } from '../../components/ui/table-shell/table-shell';
+import { ActiveBadge } from '../../components/ui/active-badge/active-badge';
 import { CHANNEL_LABELS, EVENT_LABELS, RECIPIENT_LABELS } from '../../core/config/notifications';
 import {
   NotificationChannel,
@@ -23,7 +23,7 @@ function toggleItem<T>(items: T[], item: T, checked: boolean): T[] {
 /** Canales y destinatarios de cada notificación del sistema. Los eventos son fijos; solo se configuran. */
 @Component({
   selector: 'app-notifications',
-  imports: [Alert, Badge, Button, PageHeader, SectionCard, TableShell],
+  imports: [Alert, Button, PageHeader, SectionCard, TableShell, ActiveBadge],
   templateUrl: './notifications.html',
 })
 export class Notifications {

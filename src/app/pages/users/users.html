@@ -1,4 +1,7 @@
-<app-page-header title="Usuarios" description="Cuentas de acceso, roles y sede predeterminada de cada persona.">
+<app-page-header
+  title="Usuarios"
+  description="Cuentas de acceso, roles y sede predeterminada de cada persona."
+>
   <button type="button" appButton>
     <span class="material-symbols-outlined text-[18px]" aria-hidden="true">person_add</span>
     Invitar usuario
@@ -6,7 +9,12 @@
 </app-page-header>
 
 <div class="mb-space-md">
-  <app-search-input label="Buscar usuarios" placeholder="Buscar por nombre, correo, rol o área" class="md:w-96" [(value)]="query" />
+  <app-search-input
+    label="Buscar usuarios"
+    placeholder="Buscar por nombre, correo, rol o área"
+    class="md:w-96"
+    [(value)]="query"
+  />
 </div>
 
 @if (users(); as state) {
@@ -19,8 +27,12 @@
   } @else {
     <app-table-shell [summary]="filtered().length + ' de ' + state.data.length + ' usuarios'">
       <table class="w-full min-w-[820px] border-collapse text-left">
-        <caption class="sr-only">Listado de usuarios</caption>
-        <thead class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary">
+        <caption class="sr-only">
+          Listado de usuarios
+        </caption>
+        <thead
+          class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+        >
           <tr class="border-b border-outline-variant">
             <th scope="col" class="h-10 px-space-md font-medium">Nombre</th>
             <th scope="col" class="h-10 px-space-md font-medium">Rol</th>
@@ -48,11 +60,7 @@
                 }
               </td>
               <td class="px-space-md">
-                @if (user.active) {
-                  <app-badge tone="success">Activo</app-badge>
-                } @else {
-                  <app-badge tone="neutral">Inactivo</app-badge>
-                }
+                <app-active-badge [active]="user.active" />
               </td>
             </tr>
           }

@@ -115,9 +115,11 @@
                 {{ locationsOf(site.id).length }}
               </td>
               <td class="px-space-md">
-                <app-badge [tone]="site.active ? 'success' : 'neutral'">
-                  {{ site.active ? 'Activa' : 'Inactiva' }}
-                </app-badge>
+                <app-active-badge
+                  [active]="site.active"
+                  activeLabel="Activa"
+                  inactiveLabel="Inactiva"
+                />
               </td>
               <td class="px-space-md">
                 <div class="flex items-center justify-end gap-space-xs">
@@ -252,9 +254,11 @@
                   }
                 </td>
                 <td class="px-space-md">
-                  <app-badge [tone]="location.active ? 'success' : 'neutral'">
-                    {{ location.active ? 'Activa' : 'Inactiva' }}
-                  </app-badge>
+                  <app-active-badge
+                    [active]="location.active"
+                    activeLabel="Activa"
+                    inactiveLabel="Inactiva"
+                  />
                 </td>
                 <td class="px-space-md">
                   <div class="flex items-center justify-end gap-space-xs">

@@ -6,6 +6,7 @@ import { PageHeader } from '../../components/ui/page-header/page-header';
 import { ReservationStatusBadge } from '../../components/ui/reservation-status-badge/reservation-status-badge';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
 import { TableShell } from '../../components/ui/table-shell/table-shell';
+import { SectionCard } from '../../components/ui/section-card/section-card';
 import { Reservation, ReservationStatus } from '../../core/models/reservation.model';
 import { Resource } from '../../core/models/resource.model';
 import { ReservationService } from '../../core/services/reservation.service';
@@ -41,7 +42,7 @@ interface CalendarRow {
 
 @Component({
   selector: 'app-calendar',
-  imports: [DatePipe, PageHeader, ReservationStatusBadge, RouterLink, StatePanel, TableShell],
+  imports: [DatePipe, PageHeader, ReservationStatusBadge, RouterLink, StatePanel, TableShell, SectionCard],
   templateUrl: './calendar.html',
 })
 export class Calendar {

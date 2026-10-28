@@ -2,11 +2,12 @@ import { KeyValuePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 
 import { Alert } from '../../components/ui/alert/alert';
-import { Badge } from '../../components/ui/badge/badge';
 import { Button } from '../../components/ui/button/button';
 import { FilterChipOption, FilterChips } from '../../components/ui/filter-chips/filter-chips';
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { TableShell } from '../../components/ui/table-shell/table-shell';
+import { SectionCard } from '../../components/ui/section-card/section-card';
+import { ActiveBadge } from '../../components/ui/active-badge/active-badge';
 import { CATEGORY_CONFIG } from '../../core/config/booking-config';
 import { OperationsStore } from '../../core/services/operations.store';
 import { BookingRule, RuleKind, ruleViolations } from '../../core/utils/rules';
@@ -26,7 +27,16 @@ const VIEW_OPTIONS: FilterChipOption[] = [
 /** Reglas que limitan cuándo y cuánto se puede reservar, con simulador, y la política de cancelación. */
 @Component({
   selector: 'app-rules',
-  imports: [Alert, Badge, Button, FilterChips, KeyValuePipe, PageHeader, TableShell],
+  imports: [
+    Alert,
+    Button,
+    FilterChips,
+    KeyValuePipe,
+    PageHeader,
+    TableShell,
+    SectionCard,
+    ActiveBadge,
+  ],
   templateUrl: './rules.html',
 })
 export class Rules {

@@ -32,9 +32,7 @@
       }
     </ol>
 
-    <section
-      class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
-    >
+    <app-section-card>
       @switch (step()) {
         @case (0) {
           <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
@@ -340,7 +338,7 @@
           }
         }
       }
-    </section>
+    </app-section-card>
 
     <div class="mt-space-lg flex items-center justify-between gap-space-md">
       <button type="button" appButton variant="ghost" [disabled]="step() === 0" (click)="back()">

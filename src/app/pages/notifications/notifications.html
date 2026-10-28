@@ -84,9 +84,11 @@
             <td class="px-space-md text-on-surface-variant">{{ channelsLabel(rule) }}</td>
             <td class="px-space-md text-on-surface-variant">{{ recipientsLabel(rule) }}</td>
             <td class="px-space-md">
-              <app-badge [tone]="rule.active ? 'success' : 'neutral'">
-                {{ rule.active ? 'Activa' : 'Inactiva' }}
-              </app-badge>
+              <app-active-badge
+                [active]="rule.active"
+                activeLabel="Activa"
+                inactiveLabel="Inactiva"
+              />
             </td>
             <td class="px-space-md">
               <div class="flex items-center justify-end gap-space-xs">

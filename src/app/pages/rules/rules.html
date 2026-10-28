@@ -35,9 +35,11 @@
                 </td>
                 <td class="px-space-md">
                   <div class="flex items-center gap-space-sm">
-                    <app-badge [tone]="rule.active ? 'success' : 'neutral'">{{
-                      rule.active ? 'Activa' : 'Inactiva'
-                    }}</app-badge>
+                    <app-active-badge
+                      [active]="rule.active"
+                      activeLabel="Activa"
+                      inactiveLabel="Inactiva"
+                    />
                     <button type="button" appButton variant="ghost" (click)="toggle(rule)">
                       {{ rule.active ? 'Desactivar' : 'Activar' }}
                     </button>
@@ -49,10 +51,7 @@
         </table>
       </app-table-shell>
 
-      <section
-        aria-label="Nueva regla"
-        class="mt-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
-      >
+      <app-section-card aria-label="Nueva regla" class="mt-space-lg" role="region">
         <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Nueva regla</h2>
         <div class="flex flex-wrap items-end gap-space-md">
           <label class="flex flex-col gap-space-xs text-label-md text-on-surface">
@@ -102,13 +101,10 @@
             Crear regla
           </button>
         </div>
-      </section>
+      </app-section-card>
     </div>
 
-    <section
-      aria-label="Simulador de reglas"
-      class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
-    >
+    <app-section-card aria-label="Simulador de reglas" role="region">
       <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">Simulador</h2>
       <p class="mb-space-md text-body-sm text-on-surface-variant">
         Comprueba si una solicitud cumpliría las reglas activas.
@@ -159,13 +155,10 @@
           }
         }
       </div>
-    </section>
+    </app-section-card>
   </div>
 } @else {
-  <section
-    aria-label="Política de cancelación"
-    class="max-w-[640px] rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
-  >
+  <app-section-card aria-label="Política de cancelación" class="max-w-[640px]" role="region">
     <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
       Política de cancelación
     </h2>
@@ -209,5 +202,5 @@
         }
       </div>
     </div>
-  </section>
+  </app-section-card>
 }

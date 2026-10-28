@@ -68,48 +68,26 @@
       aria-label="Indicadores"
       class="grid grid-cols-1 gap-gutter sm:grid-cols-2 xl:grid-cols-4"
     >
-      <div
-        class="flex flex-col gap-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
-      >
-        <span class="text-label-md text-secondary">Reservas en el periodo</span>
-        <span class="font-headline text-headline-xl tabular-nums text-on-surface">{{
-          kpis().total
-        }}</span>
-        <span class="text-body-sm text-on-surface-variant">{{ kpis().approved }} aprobadas</span>
-      </div>
-      <div
-        class="flex flex-col gap-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
-      >
-        <span class="text-label-md text-secondary">Tasa de aprobación</span>
-        <span class="font-headline text-headline-xl tabular-nums text-on-surface">{{
-          kpis().approvedRate
-        }}</span>
-        <span class="text-body-sm text-on-surface-variant"
-          >Confirmadas, en curso o finalizadas</span
-        >
-      </div>
-      <div
-        class="flex flex-col gap-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
-      >
-        <span class="text-label-md text-secondary">Cancelaciones y rechazos</span>
-        <span class="font-headline text-headline-xl tabular-nums text-on-surface">{{
-          kpis().cancelledRate
-        }}</span>
-        <span class="text-body-sm text-on-surface-variant"
-          >{{ kpis().cancelledOrRejected }} reservas</span
-        >
-      </div>
-      <div
-        class="flex flex-col gap-space-sm rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
-      >
-        <span class="text-label-md text-secondary">No asistencias</span>
-        <span class="font-headline text-headline-xl tabular-nums text-on-surface">{{
-          kpis().noShowRate
-        }}</span>
-        <span class="text-body-sm text-on-surface-variant"
-          >{{ kpis().noShow }} reservas · {{ kpis().attendees }} personas atendidas</span
-        >
-      </div>
+      <app-metric-card
+        label="Reservas en el periodo"
+        [value]="kpis().total"
+        [hint]="kpis().approved + ' aprobadas'"
+      />
+      <app-metric-card
+        label="Tasa de aprobación"
+        [value]="kpis().approvedRate"
+        hint="Confirmadas, en curso o finalizadas"
+      />
+      <app-metric-card
+        label="Cancelaciones y rechazos"
+        [value]="kpis().cancelledRate"
+        [hint]="kpis().cancelledOrRejected + ' reservas'"
+      />
+      <app-metric-card
+        label="No asistencias"
+        [value]="kpis().noShowRate"
+        [hint]="kpis().noShow + ' reservas · ' + kpis().attendees + ' personas atendidas'"
+      />
     </section>
 
     <div class="mt-space-lg grid gap-gutter xl:grid-cols-2">

@@ -93,9 +93,11 @@
                 {{ typesOf(category.id).length }}
               </td>
               <td class="px-space-md">
-                <app-badge [tone]="category.active ? 'success' : 'neutral'">
-                  {{ category.active ? 'Activa' : 'Inactiva' }}
-                </app-badge>
+                <app-active-badge
+                  [active]="category.active"
+                  activeLabel="Activa"
+                  inactiveLabel="Inactiva"
+                />
               </td>
               <td class="px-space-md">
                 <div class="flex items-center justify-end gap-space-xs">
@@ -230,9 +232,11 @@
                   }
                 </td>
                 <td class="px-space-md">
-                  <app-badge [tone]="type.active ? 'success' : 'neutral'">
-                    {{ type.active ? 'Activo' : 'Inactivo' }}
-                  </app-badge>
+                  <app-active-badge
+                    [active]="type.active"
+                    activeLabel="Activo"
+                    inactiveLabel="Inactivo"
+                  />
                 </td>
                 <td class="px-space-md">
                   <div class="flex items-center justify-end gap-space-xs">

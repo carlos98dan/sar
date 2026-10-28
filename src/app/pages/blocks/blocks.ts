@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/button/button';
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
 import { TableShell } from '../../components/ui/table-shell/table-shell';
+import { SectionCard } from '../../components/ui/section-card/section-card';
 import { Reservation } from '../../core/models/reservation.model';
 import { Block, BlockType, OperationsStore } from '../../core/services/operations.store';
 import { ReservationService } from '../../core/services/reservation.service';
@@ -29,7 +30,7 @@ const TYPE_LABELS: Record<BlockType, string> = {
 /** Periodos en los que un recurso o todas las sedes no aceptan reservas: mantenimiento, limpieza, eventos y cierres. */
 @Component({
   selector: 'app-blocks',
-  imports: [DatePipe, Alert, Badge, Button, PageHeader, StatePanel, TableShell],
+  imports: [DatePipe, Alert, Badge, Button, PageHeader, StatePanel, TableShell, SectionCard],
   templateUrl: './blocks.html',
 })
 export class Blocks {

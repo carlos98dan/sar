@@ -164,9 +164,11 @@
                 }
               </td>
               <td class="px-space-md">
-                <app-badge [tone]="flow.active ? 'success' : 'neutral'">
-                  {{ flow.active ? 'Activo' : 'Inactivo' }}
-                </app-badge>
+                <app-active-badge
+                  [active]="flow.active"
+                  activeLabel="Activo"
+                  inactiveLabel="Inactivo"
+                />
               </td>
               <td class="px-space-md">
                 <div class="flex items-center justify-end gap-space-xs">

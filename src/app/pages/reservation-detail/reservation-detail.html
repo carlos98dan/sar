@@ -15,43 +15,40 @@
       <app-alert class="mb-space-md" tone="danger" icon="error">{{ actionError() }}</app-alert>
     }
 
-    <div
-      class="mb-space-lg flex flex-col gap-space-md rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg md:flex-row md:items-center md:justify-between"
-    >
-      <div class="flex items-center gap-space-md">
-        <span class="text-label-md text-secondary">Estado</span>
-        <app-reservation-status-badge [status]="detail.reservation.status" />
-      </div>
-
-      @if (actions().length === 0) {
-        <p class="text-body-sm text-on-surface-variant">
-          Esta reserva está cerrada. No hay acciones disponibles.
-        </p>
-      } @else {
-        <div class="flex flex-wrap items-center gap-space-sm">
-          @for (action of actions(); track action) {
-            @if (needsReason(action) || action === 'reschedule') {
-              <button
-                type="button"
-                appButton
-                [variant]="action === 'cancel' || action === 'reject' ? 'ghost' : 'outline'"
-                (click)="open(action)"
-              >
-                {{ labels[action] }}
-              </button>
-            } @else {
-              <button type="button" appButton (click)="run(action)">{{ labels[action] }}</button>
-            }
-          }
+    <app-section-card class="mb-space-lg">
+      <div class="flex flex-col gap-space-md md:flex-row md:items-center md:justify-between">
+        <div class="flex items-center gap-space-md">
+          <span class="text-label-md text-secondary">Estado</span>
+          <app-reservation-status-badge [status]="detail.reservation.status" />
         </div>
-      }
-    </div>
+
+        @if (actions().length === 0) {
+          <p class="text-body-sm text-on-surface-variant">
+            Esta reserva está cerrada. No hay acciones disponibles.
+          </p>
+        } @else {
+          <div class="flex flex-wrap items-center gap-space-sm">
+            @for (action of actions(); track action) {
+              @if (needsReason(action) || action === 'reschedule') {
+                <button
+                  type="button"
+                  appButton
+                  [variant]="action === 'cancel' || action === 'reject' ? 'ghost' : 'outline'"
+                  (click)="open(action)"
+                >
+                  {{ labels[action] }}
+                </button>
+              } @else {
+                <button type="button" appButton (click)="run(action)">{{ labels[action] }}</button>
+              }
+            }
+          </div>
+        }
+      </div>
+    </app-section-card>
 
     @if (openAction(); as action) {
-      <section
-        aria-label="Confirmar acción"
-        class="mb-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
-      >
+      <app-section-card aria-label="Confirmar acción" class="mb-space-lg" role="region">
         <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
           {{ labels[action] }}
         </h2>
@@ -117,13 +114,11 @@
           </button>
           <button type="button" appButton variant="ghost" (click)="close()">Cancelar</button>
         </div>
-      </section>
+      </app-section-card>
     }
 
     <div class="grid gap-gutter xl:grid-cols-3">
-      <section
-        class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg xl:col-span-2"
-      >
+      <app-section-card class="xl:col-span-2">
         <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
           Información general
         </h2>
@@ -164,11 +159,9 @@
             </div>
           }
         </dl>
-      </section>
+      </app-section-card>
 
-      <section
-        class="rounded-lg border border-outline-variant bg-surface-container-lowest p-space-lg"
-      >
+      <app-section-card>
         <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
           Costo de referencia
         </h2>
@@ -186,12 +179,10 @@
             </p>
           }
         }
-      </section>
+      </app-section-card>
     </div>
 
-    <section
-      class="mt-space-lg rounded-lg border border-outline-variant bg-surface-container-lowest"
-    >
+    <app-section-card class="mt-space-lg" padding="none">
       <div class="flex h-12 items-center border-b border-outline-variant px-space-lg">
         <h2 class="font-headline text-headline-sm text-on-surface">Historial</h2>
       </div>
@@ -220,6 +211,6 @@
           }
         </ul>
       }
-    </section>
+    </app-section-card>
   }
 }

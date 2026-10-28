@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button/button';
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
 import { TableShell } from '../../components/ui/table-shell/table-shell';
+import { SectionCard } from '../../components/ui/section-card/section-card';
 import {
   IncidentPriority,
   IncidentStatus,
@@ -32,7 +33,7 @@ const STATUS_META: Record<IncidentStatus, { label: string; tone: BadgeTone }> = 
 /** Incidencias asociadas a un recurso: reporte, prioridad, responsable y seguimiento hasta resolverla. */
 @Component({
   selector: 'app-incidents',
-  imports: [DatePipe, Badge, Button, PageHeader, StatePanel, TableShell],
+  imports: [DatePipe, Badge, Button, PageHeader, StatePanel, TableShell, SectionCard],
   templateUrl: './incidents.html',
 })
 export class Incidents {

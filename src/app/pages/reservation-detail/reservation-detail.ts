@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/button/button';
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { ReservationStatusBadge } from '../../components/ui/reservation-status-badge/reservation-status-badge';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
+import { SectionCard } from '../../components/ui/section-card/section-card';
 import { HOURLY_RATES } from '../../core/config/booking-config';
 import {
   DecisionRecord,
@@ -43,7 +44,16 @@ interface ReservationView {
 
 @Component({
   selector: 'app-reservation-detail',
-  imports: [DatePipe, Alert, Button, PageHeader, ReservationStatusBadge, RouterLink, StatePanel],
+  imports: [
+    DatePipe,
+    Alert,
+    Button,
+    PageHeader,
+    ReservationStatusBadge,
+    RouterLink,
+    StatePanel,
+    SectionCard,
+  ],
   templateUrl: './reservation-detail.html',
 })
 export class ReservationDetail {

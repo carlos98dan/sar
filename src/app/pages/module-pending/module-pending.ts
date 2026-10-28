@@ -3,11 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
+import { SectionCard } from '../../components/ui/section-card/section-card';
 
 /** Página provisional para los módulos del menú que aún no tienen pantalla. */
 @Component({
   selector: 'app-module-pending',
-  imports: [PageHeader, StatePanel],
+  imports: [PageHeader, StatePanel, SectionCard],
   templateUrl: './module-pending.html',
 })
 export class ModulePending {

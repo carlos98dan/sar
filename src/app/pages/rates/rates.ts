@@ -3,6 +3,7 @@ import { Alert } from '../../components/ui/alert/alert';
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
 import { TableShell } from '../../components/ui/table-shell/table-shell';
+import { SectionCard } from '../../components/ui/section-card/section-card';
 import { Resource } from '../../core/models/resource.model';
 import { OperationsStore } from '../../core/services/operations.store';
 import { ResourceService } from '../../core/services/resource.service';
@@ -17,7 +18,7 @@ const COP = new Intl.NumberFormat('es-CO', {
 /** Tarifa por hora de cada recurso en COP, con simulación del costo de una reserva. */
 @Component({
   selector: 'app-rates',
-  imports: [Alert, PageHeader, StatePanel, TableShell],
+  imports: [Alert, PageHeader, StatePanel, TableShell, SectionCard],
   templateUrl: './rates.html',
 })
 export class Rates {

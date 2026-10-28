@@ -1,12 +1,12 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 
-import { Badge } from '../../components/ui/badge/badge';
 import { Button } from '../../components/ui/button/button';
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { SearchInput } from '../../components/ui/search-input/search-input';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
 import { TableShell } from '../../components/ui/table-shell/table-shell';
+import { ActiveBadge } from '../../components/ui/active-badge/active-badge';
 import { ROLE_LABELS } from '../../core/config/roles';
 import { User } from '../../core/models/user.model';
 import { UserService } from '../../core/services/user.service';
@@ -15,7 +15,7 @@ import { viewStateSignal } from '../../core/utils/view-state';
 
 @Component({
   selector: 'app-users',
-  imports: [DatePipe, Badge, Button, PageHeader, SearchInput, StatePanel, TableShell],
+  imports: [DatePipe, Button, PageHeader, SearchInput, StatePanel, TableShell, ActiveBadge],
   templateUrl: './users.html',
 })
 export class Users {
@@ -33,7 +33,12 @@ export class Users {
     }
 
     return state.data.filter((user) =>
-      matchesQuery(this.query(), [user.fullName, user.email, user.department, ROLE_LABELS[user.role]]),
+      matchesQuery(this.query(), [
+        user.fullName,
+        user.email,
+        user.department,
+        ROLE_LABELS[user.role],
+      ]),
     );
   });
 }

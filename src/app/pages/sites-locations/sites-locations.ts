@@ -1,13 +1,13 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { Badge } from '../../components/ui/badge/badge';
 import { Button } from '../../components/ui/button/button';
 import { FormField } from '../../components/ui/form-field/form-field';
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { SectionCard } from '../../components/ui/section-card/section-card';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
 import { TableShell } from '../../components/ui/table-shell/table-shell';
+import { ActiveBadge } from '../../components/ui/active-badge/active-badge';
 import { ManagedSite, SiteLocation } from '../../core/models/catalog.model';
 import { CatalogStore } from '../../core/services/catalog.store';
 
@@ -19,13 +19,13 @@ const INPUT_CLASS =
   selector: 'app-sites-locations',
   imports: [
     ReactiveFormsModule,
-    Badge,
     Button,
     FormField,
     PageHeader,
     SectionCard,
     StatePanel,
     TableShell,
+    ActiveBadge,
   ],
   templateUrl: './sites-locations.html',
 })

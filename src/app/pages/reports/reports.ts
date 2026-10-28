@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/button/button';
 import { PageHeader } from '../../components/ui/page-header/page-header';
 import { StatePanel } from '../../components/ui/state-panel/state-panel';
 import { TableShell } from '../../components/ui/table-shell/table-shell';
+import { MetricCard } from '../../components/ui/metric-card/metric-card';
 import { Reservation, ReservationStatus } from '../../core/models/reservation.model';
 import { ReservationService } from '../../core/services/reservation.service';
 import { ResourceService } from '../../core/services/resource.service';
@@ -54,7 +55,7 @@ function csvCell(value: string): string {
 /** Indicadores y desgloses de reservas por rango de fechas y categoría, con exportación a CSV. */
 @Component({
   selector: 'app-reports',
-  imports: [FormsModule, Button, PageHeader, StatePanel, TableShell],
+  imports: [FormsModule, Button, PageHeader, StatePanel, TableShell, MetricCard],
   templateUrl: './reports.html',
 })
 export class Reports {
