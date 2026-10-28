@@ -1,7 +1,9 @@
 <header class="flex h-14 shrink-0 items-center gap-space-md border-b border-outline-variant bg-surface-container-lowest px-gutter md:px-margin-desktop">
   <button
     type="button"
-    class="flex h-9 w-9 items-center justify-center rounded text-secondary hover:bg-surface-container-high md:hidden"
+    appButton
+    variant="ghost"
+    size="sm"
     aria-label="Abrir menú"
     (click)="menuClick.emit()"
   >
@@ -35,7 +37,8 @@
 
   <a
     routerLink="/reservas/nueva"
-    class="hidden h-9 items-center gap-space-sm rounded bg-primary-container px-space-md text-body-md font-medium text-on-primary hover:bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-container sm:flex"
+    appButton
+    class="hidden sm:flex"
   >
     <span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
     Nueva reserva
@@ -43,22 +46,27 @@
 
   <button
     type="button"
-    class="flex h-9 w-9 items-center justify-center rounded text-secondary hover:bg-surface-container-high"
+    appButton
+    variant="ghost"
+    size="sm"
     [attr.aria-label]="theme() === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'"
     (click)="toggleTheme()"
   >
     <span class="material-symbols-outlined" aria-hidden="true">{{ theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</span>
   </button>
-  <button type="button" class="flex h-9 w-9 items-center justify-center rounded text-secondary hover:bg-surface-container-high" aria-label="Notificaciones">
+  <button type="button" appButton variant="ghost" size="sm" aria-label="Notificaciones">
     <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
   </button>
-  <button type="button" class="hidden h-9 w-9 items-center justify-center rounded text-secondary hover:bg-surface-container-high sm:flex" aria-label="Ayuda">
+  <button type="button" appButton variant="ghost" size="sm" aria-label="Ayuda" class="hidden sm:flex">
     <span class="material-symbols-outlined" aria-hidden="true">help</span>
   </button>
   <div class="relative">
     <button
       type="button"
-      class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-fixed text-label-md font-medium text-on-primary-fixed-variant focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-container"
+      appButton
+      size="sm"
+      round
+      class="bg-primary-fixed text-label-md text-on-primary-fixed-variant"
       aria-label="Menú de usuario"
       aria-haspopup="menu"
       [attr.aria-expanded]="userMenuOpen()"

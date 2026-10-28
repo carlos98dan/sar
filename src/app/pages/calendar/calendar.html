@@ -2,7 +2,9 @@
   <div class="flex items-center gap-space-sm">
     <button
       type="button"
-      class="flex h-9 w-9 items-center justify-center rounded border border-outline-variant bg-surface-container-lowest text-secondary hover:bg-surface-container-high"
+      appButton
+      variant="outline"
+      size="sm"
       aria-label="Día anterior"
       (click)="shiftDate(-1)"
     >
@@ -17,13 +19,15 @@
     />
     <button
       type="button"
-      class="flex h-9 w-9 items-center justify-center rounded border border-outline-variant bg-surface-container-lowest text-secondary hover:bg-surface-container-high"
+      appButton
+      variant="outline"
+      size="sm"
       aria-label="Día siguiente"
       (click)="shiftDate(1)"
     >
       <span class="material-symbols-outlined text-[18px]" aria-hidden="true">chevron_right</span>
     </button>
-    <button type="button" class="h-9 rounded px-space-md text-label-md font-medium text-primary hover:bg-primary-fixed" (click)="goToToday()">
+    <button type="button" appButton variant="ghost" (click)="goToToday()">
       Hoy
     </button>
   </div>
