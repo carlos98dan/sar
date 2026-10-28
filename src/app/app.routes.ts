@@ -13,6 +13,8 @@ const IMPLEMENTED: Record<string, () => Promise<Type<unknown>>> = {
   reservas: () => import('./pages/reservations/reservations').then((m) => m.Reservations),
   solicitudes: () => import('./pages/requests/requests').then((m) => m.Requests),
   recursos: () => import('./pages/resources/resources').then((m) => m.Resources),
+  'categorias-tipos': () => import('./pages/categories-types/categories-types').then((m) => m.CategoriesTypes),
+  sedes: () => import('./pages/sites-locations/sites-locations').then((m) => m.SitesLocations),
   'control-diario': () => import('./pages/daily-control/daily-control').then((m) => m.DailyControl),
   incidencias: () => import('./pages/incidents/incidents').then((m) => m.Incidents),
   bloqueos: () => import('./pages/blocks/blocks').then((m) => m.Blocks),

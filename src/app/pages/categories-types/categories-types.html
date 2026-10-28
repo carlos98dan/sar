@@ -1,0 +1,272 @@
+<app-page-header
+  title="Categorías y tipos"
+  description="Agrupa los recursos por categoría y define los tipos dentro de cada una. Los cambios se mantienen durante la sesión."
+/>
+
+<div class="grid gap-gutter xl:grid-cols-3">
+  <app-section-card class="xl:col-span-1">
+    <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+      {{ editingCategory() ? 'Editar categoría' : 'Nueva categoría' }}
+    </h2>
+    <form
+      [formGroup]="categoryForm"
+      (ngSubmit)="saveCategory()"
+      novalidate
+      class="flex flex-col gap-space-md"
+    >
+      <app-form-field
+        label="Nombre"
+        controlId="category-name"
+        [error]="
+          categoryForm.controls.name.touched && categoryForm.controls.name.invalid
+            ? 'Ingresa un nombre de hasta 80 caracteres.'
+            : ''
+        "
+      >
+        <input
+          id="category-name"
+          formControlName="name"
+          [class]="inputClass"
+          [attr.aria-invalid]="
+            categoryForm.controls.name.touched && categoryForm.controls.name.invalid
+          "
+        />
+      </app-form-field>
+      <app-form-field label="Descripción" controlId="category-description">
+        <textarea
+          id="category-description"
+          rows="2"
+          formControlName="description"
+          class="rounded border border-outline-variant bg-surface-container-lowest p-space-sm text-body-md focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+        ></textarea>
+      </app-form-field>
+      <div class="flex items-center gap-space-sm">
+        <button type="submit" appButton>
+          {{ editingCategory() ? 'Guardar cambios' : 'Crear categoría' }}
+        </button>
+        @if (editingCategory()) {
+          <button type="button" appButton variant="outline" (click)="cancelCategoryEdit()">
+            Cancelar
+          </button>
+        }
+      </div>
+    </form>
+  </app-section-card>
+
+  @if (categories().length === 0) {
+    <div class="xl:col-span-2">
+      <app-state-panel kind="empty" message="No hay categorías registradas." />
+    </div>
+  } @else {
+    <app-table-shell class="xl:col-span-2" [summary]="categories().length + ' categorías'">
+      <table class="w-full min-w-[640px] border-collapse text-left">
+        <caption class="sr-only">
+          Categorías de recursos
+        </caption>
+        <thead
+          class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+        >
+          <tr class="border-b border-outline-variant">
+            <th scope="col" class="h-10 px-space-md font-medium">Nombre</th>
+            <th scope="col" class="h-10 px-space-md text-right font-medium">Tipos</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+            <th scope="col" class="h-10 px-space-md font-medium">
+              <span class="sr-only">Acciones</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-container-high text-body-md">
+          @for (category of categories(); track category.id) {
+            <tr
+              class="h-14 hover:bg-surface-container-low"
+              [class.bg-surface-container-low]="category.id === selectedCategoryId()"
+            >
+              <td class="px-space-md">
+                <span class="block font-medium text-on-surface">{{ category.name }}</span>
+                @if (category.description) {
+                  <span class="block text-body-sm text-on-surface-variant">{{
+                    category.description
+                  }}</span>
+                }
+              </td>
+              <td class="px-space-md text-right tabular-nums text-on-surface">
+                {{ typesOf(category.id).length }}
+              </td>
+              <td class="px-space-md">
+                <app-badge [tone]="category.active ? 'success' : 'neutral'">
+                  {{ category.active ? 'Activa' : 'Inactiva' }}
+                </app-badge>
+              </td>
+              <td class="px-space-md">
+                <div class="flex items-center justify-end gap-space-xs">
+                  <button
+                    type="button"
+                    appButton
+                    variant="ghost"
+                    class="h-8"
+                    [attr.aria-label]="'Ver tipos de ' + category.name"
+                    (click)="selectCategory(category)"
+                  >
+                    Tipos
+                  </button>
+                  <button
+                    type="button"
+                    appButton
+                    variant="ghost"
+                    class="h-8"
+                    [attr.aria-label]="'Editar ' + category.name"
+                    (click)="startEditCategory(category)"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    appButton
+                    variant="ghost"
+                    class="h-8"
+                    [attr.aria-label]="
+                      (category.active ? 'Desactivar ' : 'Activar ') + category.name
+                    "
+                    (click)="toggleCategory(category)"
+                  >
+                    {{ category.active ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-table-shell>
+  }
+</div>
+
+@if (selectedCategory(); as category) {
+  <h2 class="mb-space-md mt-space-lg font-headline text-headline-sm text-on-surface">
+    Tipos de {{ category.name }}
+  </h2>
+
+  <div class="grid gap-gutter xl:grid-cols-3">
+    <app-section-card class="xl:col-span-1">
+      <h3 class="mb-space-md font-headline text-headline-sm text-on-surface">
+        {{ editingType() ? 'Editar tipo' : 'Nuevo tipo' }}
+      </h3>
+      <form
+        [formGroup]="typeForm"
+        (ngSubmit)="saveType()"
+        novalidate
+        class="flex flex-col gap-space-md"
+      >
+        <app-form-field
+          label="Nombre"
+          controlId="type-name"
+          [error]="
+            typeForm.controls.name.touched && typeForm.controls.name.invalid
+              ? 'Ingresa un nombre de hasta 80 caracteres.'
+              : ''
+          "
+        >
+          <input
+            id="type-name"
+            formControlName="name"
+            [class]="inputClass"
+            [attr.aria-invalid]="typeForm.controls.name.touched && typeForm.controls.name.invalid"
+          />
+        </app-form-field>
+        <app-form-field label="Descripción" controlId="type-description">
+          <textarea
+            id="type-description"
+            rows="2"
+            formControlName="description"
+            class="rounded border border-outline-variant bg-surface-container-lowest p-space-sm text-body-md focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+          ></textarea>
+        </app-form-field>
+        <div class="flex items-center gap-space-sm">
+          <button type="submit" appButton>
+            {{ editingType() ? 'Guardar cambios' : 'Crear tipo' }}
+          </button>
+          @if (editingType()) {
+            <button type="button" appButton variant="outline" (click)="cancelTypeEdit()">
+              Cancelar
+            </button>
+          }
+        </div>
+      </form>
+    </app-section-card>
+
+    @if (categoryTypes().length === 0) {
+      <div class="xl:col-span-2">
+        <app-state-panel kind="empty" message="Esta categoría aún no tiene tipos." />
+      </div>
+    } @else {
+      <app-table-shell class="xl:col-span-2" [summary]="categoryTypes().length + ' tipos'">
+        <table class="w-full min-w-[520px] border-collapse text-left">
+          <caption class="sr-only">
+            Tipos de
+            {{
+              category.name
+            }}
+          </caption>
+          <thead
+            class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+          >
+            <tr class="border-b border-outline-variant">
+              <th scope="col" class="h-10 px-space-md font-medium">Nombre</th>
+              <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+              <th scope="col" class="h-10 px-space-md font-medium">
+                <span class="sr-only">Acciones</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container-high text-body-md">
+            @for (type of categoryTypes(); track type.id) {
+              <tr class="h-14 hover:bg-surface-container-low">
+                <td class="px-space-md">
+                  <span class="block font-medium text-on-surface">{{ type.name }}</span>
+                  @if (type.description) {
+                    <span class="block text-body-sm text-on-surface-variant">{{
+                      type.description
+                    }}</span>
+                  }
+                </td>
+                <td class="px-space-md">
+                  <app-badge [tone]="type.active ? 'success' : 'neutral'">
+                    {{ type.active ? 'Activo' : 'Inactivo' }}
+                  </app-badge>
+                </td>
+                <td class="px-space-md">
+                  <div class="flex items-center justify-end gap-space-xs">
+                    <button
+                      type="button"
+                      appButton
+                      variant="ghost"
+                      class="h-8"
+                      [attr.aria-label]="'Editar ' + type.name"
+                      (click)="startEditType(type)"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      appButton
+                      variant="ghost"
+                      class="h-8"
+                      [attr.aria-label]="(type.active ? 'Desactivar ' : 'Activar ') + type.name"
+                      (click)="toggleType(type)"
+                    >
+                      {{ type.active ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </app-table-shell>
+    }
+  </div>
+} @else {
+  <p class="mt-space-lg text-body-md text-on-surface-variant">
+    Selecciona una categoría con el botón Tipos para ver y editar sus tipos.
+  </p>
+}

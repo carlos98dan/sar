@@ -1,0 +1,296 @@
+<app-page-header
+  title="Sedes y ubicaciones"
+  description="Sedes de la organización y las ubicaciones dentro de cada una. Los cambios se mantienen durante la sesión."
+/>
+
+<div class="grid gap-gutter xl:grid-cols-3">
+  <app-section-card class="xl:col-span-1">
+    <h2 class="mb-space-md font-headline text-headline-sm text-on-surface">
+      {{ editingSite() ? 'Editar sede' : 'Nueva sede' }}
+    </h2>
+    <form
+      [formGroup]="siteForm"
+      (ngSubmit)="saveSite()"
+      novalidate
+      class="flex flex-col gap-space-md"
+    >
+      <app-form-field
+        label="Nombre"
+        controlId="site-name"
+        [error]="
+          siteForm.controls.name.touched && siteForm.controls.name.invalid
+            ? 'Ingresa un nombre de hasta 120 caracteres.'
+            : ''
+        "
+      >
+        <input
+          id="site-name"
+          formControlName="name"
+          [class]="inputClass"
+          [attr.aria-invalid]="siteForm.controls.name.touched && siteForm.controls.name.invalid"
+        />
+      </app-form-field>
+      <app-form-field
+        label="Dirección"
+        controlId="site-address"
+        [error]="
+          siteForm.controls.address.touched && siteForm.controls.address.invalid
+            ? 'Ingresa la dirección de la sede.'
+            : ''
+        "
+      >
+        <input
+          id="site-address"
+          formControlName="address"
+          [class]="inputClass"
+          [attr.aria-invalid]="
+            siteForm.controls.address.touched && siteForm.controls.address.invalid
+          "
+        />
+      </app-form-field>
+      <app-form-field
+        label="Ciudad"
+        controlId="site-city"
+        [error]="
+          siteForm.controls.city.touched && siteForm.controls.city.invalid
+            ? 'Ingresa la ciudad de la sede.'
+            : ''
+        "
+      >
+        <input
+          id="site-city"
+          formControlName="city"
+          [class]="inputClass"
+          [attr.aria-invalid]="siteForm.controls.city.touched && siteForm.controls.city.invalid"
+        />
+      </app-form-field>
+      <div class="flex items-center gap-space-sm">
+        <button type="submit" appButton>
+          {{ editingSite() ? 'Guardar cambios' : 'Crear sede' }}
+        </button>
+        @if (editingSite()) {
+          <button type="button" appButton variant="outline" (click)="cancelSiteEdit()">
+            Cancelar
+          </button>
+        }
+      </div>
+    </form>
+  </app-section-card>
+
+  @if (sites().length === 0) {
+    <div class="xl:col-span-2">
+      <app-state-panel kind="empty" message="No hay sedes registradas." />
+    </div>
+  } @else {
+    <app-table-shell class="xl:col-span-2" [summary]="sites().length + ' sedes'">
+      <table class="w-full min-w-[720px] border-collapse text-left">
+        <caption class="sr-only">
+          Sedes de la organización
+        </caption>
+        <thead
+          class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+        >
+          <tr class="border-b border-outline-variant">
+            <th scope="col" class="h-10 px-space-md font-medium">Sede</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Ciudad</th>
+            <th scope="col" class="h-10 px-space-md text-right font-medium">Ubicaciones</th>
+            <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+            <th scope="col" class="h-10 px-space-md font-medium">
+              <span class="sr-only">Acciones</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-container-high text-body-md">
+          @for (site of sites(); track site.id) {
+            <tr
+              class="h-14 hover:bg-surface-container-low"
+              [class.bg-surface-container-low]="site.id === selectedSiteId()"
+            >
+              <td class="px-space-md">
+                <span class="block font-medium text-on-surface">{{ site.name }}</span>
+                <span class="block text-body-sm text-on-surface-variant">{{ site.address }}</span>
+              </td>
+              <td class="px-space-md text-on-surface-variant">{{ site.city }}</td>
+              <td class="px-space-md text-right tabular-nums text-on-surface">
+                {{ locationsOf(site.id).length }}
+              </td>
+              <td class="px-space-md">
+                <app-badge [tone]="site.active ? 'success' : 'neutral'">
+                  {{ site.active ? 'Activa' : 'Inactiva' }}
+                </app-badge>
+              </td>
+              <td class="px-space-md">
+                <div class="flex items-center justify-end gap-space-xs">
+                  <button
+                    type="button"
+                    appButton
+                    variant="ghost"
+                    class="h-8"
+                    [attr.aria-label]="'Ver ubicaciones de ' + site.name"
+                    (click)="selectSite(site)"
+                  >
+                    Ubicaciones
+                  </button>
+                  <button
+                    type="button"
+                    appButton
+                    variant="ghost"
+                    class="h-8"
+                    [attr.aria-label]="'Editar ' + site.name"
+                    (click)="startEditSite(site)"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    appButton
+                    variant="ghost"
+                    class="h-8"
+                    [attr.aria-label]="(site.active ? 'Desactivar ' : 'Activar ') + site.name"
+                    (click)="toggleSite(site)"
+                  >
+                    {{ site.active ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-table-shell>
+  }
+</div>
+
+@if (selectedSite(); as site) {
+  <h2 class="mb-space-md mt-space-lg font-headline text-headline-sm text-on-surface">
+    Ubicaciones de {{ site.name }}
+  </h2>
+
+  <div class="grid gap-gutter xl:grid-cols-3">
+    <app-section-card class="xl:col-span-1">
+      <h3 class="mb-space-md font-headline text-headline-sm text-on-surface">
+        {{ editingLocation() ? 'Editar ubicación' : 'Nueva ubicación' }}
+      </h3>
+      <form
+        [formGroup]="locationForm"
+        (ngSubmit)="saveLocation()"
+        novalidate
+        class="flex flex-col gap-space-md"
+      >
+        <app-form-field
+          label="Nombre"
+          controlId="location-name"
+          [error]="
+            locationForm.controls.name.touched && locationForm.controls.name.invalid
+              ? 'Ingresa un nombre de hasta 80 caracteres.'
+              : ''
+          "
+        >
+          <input
+            id="location-name"
+            formControlName="name"
+            [class]="inputClass"
+            [attr.aria-invalid]="
+              locationForm.controls.name.touched && locationForm.controls.name.invalid
+            "
+          />
+        </app-form-field>
+        <app-form-field label="Descripción" controlId="location-description">
+          <textarea
+            id="location-description"
+            rows="2"
+            formControlName="description"
+            class="rounded border border-outline-variant bg-surface-container-lowest p-space-sm text-body-md focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container"
+          ></textarea>
+        </app-form-field>
+        <div class="flex items-center gap-space-sm">
+          <button type="submit" appButton>
+            {{ editingLocation() ? 'Guardar cambios' : 'Crear ubicación' }}
+          </button>
+          @if (editingLocation()) {
+            <button type="button" appButton variant="outline" (click)="cancelLocationEdit()">
+              Cancelar
+            </button>
+          }
+        </div>
+      </form>
+    </app-section-card>
+
+    @if (siteLocations().length === 0) {
+      <div class="xl:col-span-2">
+        <app-state-panel kind="empty" message="Esta sede aún no tiene ubicaciones." />
+      </div>
+    } @else {
+      <app-table-shell class="xl:col-span-2" [summary]="siteLocations().length + ' ubicaciones'">
+        <table class="w-full min-w-[520px] border-collapse text-left">
+          <caption class="sr-only">
+            Ubicaciones de
+            {{
+              site.name
+            }}
+          </caption>
+          <thead
+            class="bg-surface-container-low text-label-sm uppercase tracking-wider text-secondary"
+          >
+            <tr class="border-b border-outline-variant">
+              <th scope="col" class="h-10 px-space-md font-medium">Ubicación</th>
+              <th scope="col" class="h-10 px-space-md font-medium">Estado</th>
+              <th scope="col" class="h-10 px-space-md font-medium">
+                <span class="sr-only">Acciones</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-container-high text-body-md">
+            @for (location of siteLocations(); track location.id) {
+              <tr class="h-14 hover:bg-surface-container-low">
+                <td class="px-space-md">
+                  <span class="block font-medium text-on-surface">{{ location.name }}</span>
+                  @if (location.description) {
+                    <span class="block text-body-sm text-on-surface-variant">{{
+                      location.description
+                    }}</span>
+                  }
+                </td>
+                <td class="px-space-md">
+                  <app-badge [tone]="location.active ? 'success' : 'neutral'">
+                    {{ location.active ? 'Activa' : 'Inactiva' }}
+                  </app-badge>
+                </td>
+                <td class="px-space-md">
+                  <div class="flex items-center justify-end gap-space-xs">
+                    <button
+                      type="button"
+                      appButton
+                      variant="ghost"
+                      class="h-8"
+                      [attr.aria-label]="'Editar ' + location.name"
+                      (click)="startEditLocation(location)"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      appButton
+                      variant="ghost"
+                      class="h-8"
+                      [attr.aria-label]="
+                        (location.active ? 'Desactivar ' : 'Activar ') + location.name
+                      "
+                      (click)="toggleLocation(location)"
+                    >
+                      {{ location.active ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </app-table-shell>
+    }
+  </div>
+} @else {
+  <p class="mt-space-lg text-body-md text-on-surface-variant">
+    Selecciona una sede con el botón Ubicaciones para ver y editar sus ubicaciones.
+  </p>
+}
